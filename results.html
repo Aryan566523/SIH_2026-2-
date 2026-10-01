@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>TRINETRA Results</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: single long landing site, 1120px column, sticky nav, sections alternate open ground and panels. Links to dashboard.html for the live UI. Dark-first, same tokens as the dashboard. */
+:root {
+  --bg: #0a1216; --panel: #101c22; --panel2: #15252d; --line: #22363f;
+  --fg: #e6f0f2; --muted: #8ba3ab; --faint: #5c757e;
+  --accent: #4fd8c4; --accent-ink: #04231f;
+  --high: #ff6060; --med: #f5a524; --ok: #4ecb8a; --real: #7aa8ff;
+  --display: "Schibsted Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #edf2f4; --panel: #ffffff; --panel2: #f2f6f7; --line: #d3dfe3;
+    --fg: #0d1f26; --muted: #55707b; --faint: #7f939b;
+    --accent: #0a8f80; --accent-ink: #ffffff;
+    --high: #d42e2e; --med: #a8640a; --ok: #1b8a52; --real: #2f62d0;
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #edf2f4; --panel: #ffffff; --panel2: #f2f6f7; --line: #d3dfe3;
+  --fg: #0d1f26; --muted: #55707b; --faint: #7f939b;
+  --accent: #0a8f80; --accent-ink: #ffffff;
+  --high: #d42e2e; --med: #a8640a; --ok: #1b8a52; --real: #2f62d0;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+body { background: var(--bg); color: var(--fg); font-family: var(--display); font-size: 16px; line-height: 1.6; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.w { max-width: 1120px; margin-inline: auto; padding-inline: 20px; }
+section { padding-block: 72px; }
+.eyebrow { font: 600 11.5px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin: 0 0 14px; }
+h2 { font-size: clamp(28px, 4vw, 42px); line-height: 1.12; letter-spacing: -.02em; font-weight: 800; margin: 0 0 16px; text-wrap: balance; max-width: 22ch; }
+h3 { font-size: 18px; margin: 0 0 6px; font-weight: 700; }
+.lead { font-size: 18px; color: var(--muted); max-width: 62ch; margin: 0; }
+p { margin: 0; }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 8px; font-weight: 700; text-decoration: none; border: 1px solid var(--line); background: var(--panel); }
+.btn.pri { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn:hover { border-color: var(--accent); }
+
+/* nav */
+nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+nav .w { display: flex; align-items: center; gap: 24px; height: 56px; }
+.logo { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: .2em; text-decoration: none; font-size: 15px; }
+nav ul { display: flex; gap: 20px; list-style: none; margin: 0 0 0 auto; padding: 0; overflow-x: auto; scrollbar-width: none; }
+nav ul a { color: var(--muted); text-decoration: none; font-size: 13.5px; white-space: nowrap; }
+nav ul a:hover { color: var(--fg); }
+nav .btn { padding: 7px 14px; font-size: 13px; white-space: nowrap; }
+
+/* hero */
+.hero { padding-block: 64px 56px; }
+.hero-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 48px; align-items: center; }
+.hero h1 { font-size: clamp(40px, 7.4vw, 76px); line-height: .95; letter-spacing: .12em; font-weight: 800; margin: 0 0 20px; }
+.hero .full { font: 500 13px var(--mono); letter-spacing: .04em; color: var(--muted); margin-bottom: 22px; max-width: 52ch; }
+.hero .full b { color: var(--accent); font-weight: 600; }
+.hero .tag { font-size: clamp(20px, 2.6vw, 26px); font-weight: 600; line-height: 1.3; max-width: 26ch; margin-bottom: 14px; text-wrap: balance; }
+.hero .sub { color: var(--muted); max-width: 52ch; margin-bottom: 28px; }
+.ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+.meta { display: flex; gap: 8px 22px; flex-wrap: wrap; margin-top: 30px; font: 500 11.5px var(--mono); color: var(--faint); letter-spacing: .04em; }
+.meta b { color: var(--muted); font-weight: 500; }
+.probe { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+.probe-h { display: flex; justify-content: space-between; font: 600 10.5px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.probe-h i { font-style: normal; color: var(--ok); }
+.reading { display: grid; grid-template-columns: 110px minmax(0, 1fr); align-items: center; gap: 14px; background: var(--panel2); border-radius: 10px; padding: 12px 14px; }
+.reading small { display: block; font: 600 10.5px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.reading b { font: 600 30px/1.1 var(--mono); }
+.reading b span { font-size: 13px; color: var(--muted); font-weight: 500; margin-left: 4px; }
+.reading svg { width: 100%; height: 44px; display: block; }
+.probe-f { font-size: 13px; color: var(--muted); }
+
+/* problem */
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 36px; }
+.stat { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px; }
+.stat b { display: block; font: 700 clamp(28px, 3.4vw, 38px)/1.1 var(--mono); letter-spacing: -.02em; }
+.stat span { color: var(--muted); font-size: 14px; }
+.callout { margin-top: 20px; background: color-mix(in srgb, var(--high) 9%, var(--panel)); border: 1px solid color-mix(in srgb, var(--high) 40%, var(--line)); border-radius: 12px; padding: 20px 22px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 18px; align-items: center; }
+.callout b { font: 700 40px/1 var(--mono); color: var(--high); }
+.callout p { color: var(--fg); }
+
+/* how it works */
+.steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 36px; counter-reset: s; }
+.step { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px; position: relative; }
+.step::before { counter-increment: s; content: counter(s); font: 600 12px var(--mono); color: var(--accent-ink); background: var(--accent); width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; margin-bottom: 14px; }
+.step p { color: var(--muted); font-size: 15px; }
+
+/* demo */
+.demo { margin-top: 36px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
+.tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.tab { font: inherit; cursor: pointer; color: inherit; background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 9px 16px; font-weight: 600; }
+.tab[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.demo-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 24px; align-items: center; }
+.demo svg { width: 100%; height: auto; display: block; }
+.demo svg text { font: 400 12px var(--mono); fill: var(--faint); }
+.verdict { display: flex; flex-direction: column; gap: 10px; }
+.vrow { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 10px; align-items: start; padding: 10px 12px; background: var(--panel2); border-radius: 8px; font-size: 14px; }
+.vrow i { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font: 700 12px var(--mono); font-style: normal; color: var(--bg); background: var(--ok); }
+.vrow.bad i { background: var(--high); }
+.vrow b { display: block; font-size: 14px; }
+.vrow span { color: var(--muted); }
+.result { padding: 12px 14px; border-radius: 8px; font-weight: 700; border: 1px solid currentColor; }
+.result.real { color: var(--real); background: color-mix(in srgb, var(--real) 12%, transparent); }
+.result.fault { color: var(--high); background: color-mix(in srgb, var(--high) 12%, transparent); }
+.result small { display: block; font-weight: 400; color: var(--fg); font-size: 14px; margin-top: 2px; }
+
+/* innovation */
+.cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 36px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 22px; }
+.card p { color: var(--muted); }
+.card q { display: block; margin-top: 12px; font: 400 13px/1.5 var(--mono); color: var(--accent); quotes: none; border-left: 2px solid var(--accent); padding-left: 12px; }
+
+/* tech */
+.stack { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 36px; }
+.stack div { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px; }
+.stack h3 { font: 600 11px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.stack ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; font-size: 15px; }
+.stack li { font-weight: 600; }
+.alert-note { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; margin-top: 12px; }
+.bars { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 22px; }
+.bar { margin-top: 14px; }
+.bar div { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 6px; }
+.bar div b { font-family: var(--mono); }
+.bar i { display: block; height: 12px; border-radius: 6px; background: var(--muted); opacity: .5; }
+.bar.a i { background: var(--accent); opacity: 1; }
+.bars small { display: block; color: var(--faint); margin-top: 14px; font-size: 12.5px; }
+.plan { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 22px; }
+.plan ol { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.plan li { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 12px; font-size: 15px; }
+.plan li b { font: 600 12px var(--mono); color: var(--accent); padding-top: 3px; }
+
+/* feasibility table */
+.tbl { margin-top: 36px; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--panel); }
+.tr { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); }
+.tr > div { padding: 16px 20px; border-top: 1px solid var(--line); }
+.tr:first-child > div { border-top: 0; font: 600 11px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); background: var(--panel2); }
+.tr > div:first-child { font-weight: 600; border-right: 1px solid var(--line); }
+.tr > div:last-child { color: var(--muted); }
+
+/* impact */
+.split { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 36px; }
+.ben { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px; }
+.ben small { font: 600 10.5px var(--mono); letter-spacing: .12em; color: var(--accent); }
+.ben h3 { margin-top: 6px; }
+.ben p { color: var(--muted); font-size: 15px; }
+.goal { margin-top: 36px; font-size: clamp(22px, 3vw, 32px); line-height: 1.25; font-weight: 700; max-width: 30ch; letter-spacing: -.01em; text-wrap: balance; }
+.goal em { font-style: normal; color: var(--accent); }
+
+/* refs */
+.refs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 36px; }
+.ref { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px; }
+.ref h3 { font: 600 11px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.ref ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 14.5px; display: flex; flex-direction: column; gap: 6px; }
+.ref li b { color: var(--fg); font-weight: 600; }
+
+/* engine, results, code */
+.layers { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-top: 36px; }
+.layer { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px; }
+.layer small { font: 600 10.5px var(--mono); letter-spacing: .12em; color: var(--accent); }
+.layer h3 { margin-top: 6px; font-size: 16px; }
+.layer p { color: var(--muted); font-size: 14px; }
+.outs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+.outs .card p { font-size: 14.5px; }
+.rtable { margin-top: 36px; border: 1px solid var(--line); border-radius: 12px; overflow-x: auto; background: var(--panel); }
+.rtable table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 14.5px; }
+.rtable th, .rtable td { padding: 13px 16px; text-align: right; border-top: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.rtable th:first-child, .rtable td:first-child { text-align: left; }
+.rtable thead th { border-top: 0; font: 600 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); background: var(--panel2); }
+.rtable tr.hl td { background: color-mix(in srgb, var(--accent) 10%, transparent); font-weight: 700; }
+.rtable td b { color: var(--accent); }
+.note { color: var(--faint); font-size: 13px; margin-top: 14px; max-width: 78ch; }
+pre.code { margin: 28px 0 0; padding: 20px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow-x: auto; font: 500 13.5px/1.7 var(--mono); color: var(--fg); }
+pre.code i { color: var(--faint); font-style: normal; }
+.demo-grid .chartbox svg text { font: 400 12px var(--mono); fill: var(--faint); }
+/* cta + footer */
+.cta { text-align: left; }
+.cta-box { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: clamp(24px, 5vw, 48px); display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; }
+footer { border-top: 1px solid var(--line); padding-block: 32px; color: var(--faint); font-size: 13px; }
+footer .w { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+
+@media (max-width: 900px) {
+  .hero-grid, .demo-grid, .alert-note { grid-template-columns: minmax(0, 1fr); }
+  .stats, .stack, .split, .outs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .layers { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  nav ul { display: none; }
+  nav .btn { margin-left: auto; }
+}
+@media (max-width: 560px) {
+  section { padding-block: 52px; }
+  .stats, .stack, .split, .steps, .cards, .refs, .outs, .layers { grid-template-columns: minmax(0, 1fr); }
+  .tr { grid-template-columns: minmax(0, 1fr); }
+  .tr > div:first-child { border-right: 0; padding-bottom: 4px; }
+  .tr > div:last-child { border-top: 0; padding-top: 0; }
+  .tr:first-child > div:last-child { display: none; }
+  .callout { grid-template-columns: minmax(0, 1fr); }
+  .reading { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+<style>
+.uc-grid { display: grid; gap: 16px; margin-top: 32px; }
+.uc { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 22px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 24px; }
+.uc h3 { font-size: 20px; margin: 8px 0 8px; }
+.uc .sit { color: var(--muted); font-size: 15px; }
+.uc .tag { display: inline-block; font: 600 10.5px var(--mono); letter-spacing: .1em; text-transform: uppercase; padding: 3px 9px; border-radius: 99px; border: 1px solid currentColor; }
+.uc .tag.fault { color: var(--high); } .uc .tag.event { color: var(--real); } .uc .tag.ok { color: var(--ok); } .uc .tag.med { color: var(--med); }
+.uc .facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px; margin: 16px 0 0; }
+.uc .facts dt { font: 600 10px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.uc .facts dd { margin: 2px 0 0; font-size: 14px; overflow-wrap: anywhere; }
+.uc .facts dd.good { color: var(--ok); font-family: var(--mono); font-weight: 600; }
+.uc .said { margin-top: 14px; padding: 12px 14px; background: var(--panel2); border-radius: 8px; font-size: 14.5px; }
+.uc .cv { min-width: 0; }
+.uc .cv svg { width: 100%; height: auto; display: block; }
+.uc .cv svg text { font: 400 12px var(--mono); fill: var(--faint); }
+.uc .cv .cap { font: 600 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; display: flex; justify-content: space-between; gap: 8px; }
+.hbars { display: grid; gap: 12px; margin-top: 12px; }
+.hrow2 { display: grid; grid-template-columns: 130px minmax(0, 1fr) 46px; gap: 12px; align-items: center; font-size: 14px; }
+.hrow2 .b { height: 10px; background: var(--panel2); border-radius: 5px; overflow: hidden; } .hrow2 .b i { display: block; height: 100%; border-radius: 5px; background: var(--ok); }
+.hrow2.watch .b i { background: var(--med); } .hrow2.degraded .b i { background: var(--high); }
+.hrow2 em { font: 600 13px var(--mono); font-style: normal; text-align: right; }
+.hcard { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
+.hcard h3 { margin-bottom: 4px; } .hcard p.n { color: var(--muted); font-size: 14px; margin-top: 12px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+.mbar { display: grid; grid-template-columns: 130px minmax(0, 1fr) 90px; gap: 12px; align-items: center; margin-top: 12px; font-size: 14px; }
+.mbar .b { height: 12px; background: var(--panel2); border-radius: 6px; overflow: hidden; } .mbar .b i { display: block; height: 100%; background: var(--accent); border-radius: 6px; }
+.mbar em { font: 600 13px var(--mono); font-style: normal; text-align: right; }
+.big4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 32px; }
+ul.lim { margin: 16px 0 0; padding-left: 20px; color: var(--muted); display: grid; gap: 8px; max-width: 80ch; } ul.lim b { color: var(--fg); }
+@media (max-width: 900px) { .uc { grid-template-columns: minmax(0, 1fr); } .grid3 { grid-template-columns: minmax(0, 1fr); } .big4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .big4 { grid-template-columns: minmax(0, 1fr); } .mbar { grid-template-columns: 96px minmax(0, 1fr) 70px; } .hrow2 { grid-template-columns: 96px minmax(0, 1fr) 40px; } }
+</style>
+</head><body>
+<nav>
+  <div class="w">
+    <a class="logo" href="#top"><svg width="28" height="28" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" fill="none" stroke="var(--accent)" stroke-width="2"/><circle cx="20" cy="11" r="3.4" fill="var(--accent)"/><circle cx="11.5" cy="25.5" r="3.4" fill="var(--accent)"/><circle cx="28.5" cy="25.5" r="3.4" fill="var(--accent)"/><path d="M20 11 11.5 25.5h17Z" fill="none" stroke="var(--accent)" stroke-width="1" opacity=".55"/></svg>TRINETRA</a>
+    <ul>
+      <li><a href="#problem">Problem</a></li><li><a href="#how">How it works</a></li><li><a href="#demo">Real or broken?</a></li><li><a href="#engine">Engine</a></li><li><a href="#results">Results</a></li><li><a href="usecases.html">Use cases</a></li><li><a href="#run">Run it</a></li>
+    </ul>
+    <a class="btn pri" href="dashboard.html">Open dashboard</a>
+  </div>
+</nav>
+<header class="hero"><div class="w">
+  <p class="eyebrow">Results</p>
+  <h2 style="max-width:26ch">Accuracy, speed and limits, measured.</h2>
+  <p class="lead">Everything here comes from <code>python -m trinetra evaluate</code>, which writes <code>results/evaluation.json</code>. Detection is scored on injected faults, as the problem statement asks.</p>
+  <div class="big4" id="big"></div>
+</div></header>
+<section style="padding-top:8px"><div class="w">
+  <p class="eyebrow">Comparison</p><h2>Against the two obvious alternatives.</h2>
+  <div class="rtable"><table id="rtab"><thead><tr><th>Method</th><th>Faults caught</th><th>Alerts that were real</th><th>F1</th><th>False alarms / station-day</th><th>Real weather kept</th><th>Median time to alert</th><th>90% alerted within</th></tr></thead><tbody></tbody></table></div>
+  <p class="note" id="rnote"></p>
+  <p class="eyebrow" style="margin-top:44px">By fault type</p><h3>How many injected faults of each type were caught</h3>
+  <div id="pertype"></div>
+</div></section>
+<section style="padding-top:0"><div class="w">
+  <p class="eyebrow">Stress tests</p><h2>When conditions get harder.</h2>
+  <div class="rtable"><table id="stab"><thead><tr><th>Condition</th><th>Method</th><th>Faults caught</th><th>Alerts that were real</th><th>False alarms / station-day</th><th>Real weather kept</th><th>Root cause right</th></tr></thead><tbody></tbody></table></div>
+  <p class="note">Without neighbours the engine still catches nearly every fault, but it mistakes some real weather for faults and labels fewer causes correctly. That is why alerts from a station with no neighbours carry a lower confidence.</p>
+</div></section>
+<section style="padding-top:0"><div class="w">
+  <p class="eyebrow">Real time</p><h2>Fast enough for a live network.</h2>
+  <div class="big4" id="rt"></div>
+  <p class="note" id="rtnote"></p>
+</div></section>
+<section style="padding-top:0"><div class="w">
+  <p class="eyebrow">How it was tested</p><h2>Method and limits.</h2>
+  <ul class="lim">
+    <li><b>Data.</b> A simulated network of 57 stations at 1-minute resolution: 9 cities, each with a main station and six neighbours, plus one remote station (Leh) with none. Weather has daily and multi-day cycles, station siting offsets, and genuine heatwaves, thunderstorms, cold fronts and fog.</li>
+    <li><b>Injected faults.</b> Seven types (spike, sudden jump, slow drift, stuck value, noise burst, communication error, power glitch) at random times, sizes and stations. Half of the spikes, jumps, drifts and noise bursts are subtle.</li>
+    <li><b>Splits.</b> The models learn from 8 clean days. The fusion stage learns from a separate 3-day set with injected faults. Scores come from three further 4-day sets that no model saw.</li>
+    <li><b>A fault counts as caught</b> when an alert overlaps it on the same station. An alert with no overlapping fault is a false alarm. Time to alert runs from the fault's true start.</li>
+    <li><b>Limits.</b> The data is simulated, so real IMD archives will be harder and should be used to retrain and re-score. Slow drift cannot be told from weather at a station with no neighbours. The engine expects 1-minute data.</li>
+  </ul>
+</div></section>
+<footer><div class="w"><span>TRINETRA &middot; Team Secure OOPS &middot; Team ID 126173 &middot; Smart India Hackathon 2026, problem statement SIH26073</span><span>Readings are simulated. All alerts are produced by the TRINETRA engine.</span></div></footer>
+<script src="data.js"></script>
+<script src="web/ui.js"></script>
+<script>
+(function () {
+  var T = window.TUI, D = T && T.D, $ = function (id) { return document.getElementById(id); };
+  var E = D && D.evaluation; if (!E) { $("big").innerHTML = '<p class="note">evaluation.json not found in data.js. Run python -m trinetra evaluate, then python -m trinetra export.</p>'; return; }
+  var pc = function (x) { return x == null ? "\u2013" : Math.round(x * 1000) / 10 + "%"; }, S = E.summary, F = S["TRINETRA (full)"], Q = S["Threshold QC only"];
+  $("big").innerHTML = [[pc(F.recall), "of injected faults caught"], [pc(F.precision), "of alerts were real faults"], [F.false_alarms_per_station_day.toFixed(3), "false alarms per station per day"], [pc(F.root_cause_accuracy), "of fault types named correctly"]].map(function (x) { return '<div class="stat"><b>' + x[0] + '</b><span>' + x[1] + '</span></div>'; }).join("");
+  var order = ["Threshold QC only", "Temporal AI only", "TRINETRA (full)"];
+  $("rtab").querySelector("tbody").innerHTML = order.map(function (k) { var r = S[k], full = k === "TRINETRA (full)"; return '<tr class="' + (full ? "hl" : "") + '"><td>' + (full ? "TRINETRA (all 5 layers)" : k) + '</td><td>' + pc(r.recall) + '</td><td>' + pc(r.precision) + '</td><td>' + r.f1.toFixed(3) + '</td><td>' + r.false_alarms_per_station_day.toFixed(3) + '</td><td>' + pc(r.genuine_kept_rate) + '</td><td>' + r.median_latency_min.toFixed(0) + ' min</td><td>' + r.p90_latency_min.toFixed(0) + ' min</td></tr>'; }).join("");
+  $("rnote").textContent = "Averages over " + E.seeds.length + " independent 4-day test runs on " + E.stations + " stations, " + F.injected + " injected faults in total. Threshold QC only checks range, jump, stuck and missing values. Temporal AI only has no physics or neighbour context, so it flags real weather as faults.";
+  var names = { spike: "Transient spike", level_shift: "Sudden jump", stuck: "Stuck value", drift: "Slow drift", noise_burst: "Noise burst", comm_error: "Communication error", power_glitch: "Power glitch" };
+  $("pertype").innerHTML = Object.keys(S.per_type).map(function (k) { var d = S.per_type[k]; return '<div class="mbar"><span>' + names[k] + '</span><div class="b"><i style="width:' + d.recall * 100 + '%"></i></div><em>' + pc(d.recall) + ' of ' + d.n + '</em></div>'; }).join("");
+  var rows = "";
+  Object.keys(E.stress).forEach(function (k) { [["Threshold QC only", E.stress_baseline[k]], ["TRINETRA", E.stress[k]]].forEach(function (p, j) { var r = p[1]; rows += '<tr class="' + (j ? "hl" : "") + '"><td>' + (j ? "" : k) + '</td><td>' + p[0] + '</td><td>' + pc(r.recall) + '</td><td>' + pc(r.precision) + '</td><td>' + r.false_alarms_per_station_day.toFixed(3) + '</td><td>' + pc(r.genuine_kept_rate) + '</td><td>' + (j ? pc(r.root_cause_accuracy) : "not offered") + '</td></tr>'; }); });
+  $("stab").querySelector("tbody").innerHTML = rows;
+  var s = E.streaming;
+  $("rt").innerHTML = [[s.ms_median.toFixed(0) + " ms", "per minute for " + s.stations + " stations (median)"], [s.ms_p95.toFixed(0) + " ms", "95th percentile"], [s.identical + " of " + s.batch_alerts, "streaming alerts identical to batch"], ["112 bytes", "state of the ESP32 edge layer"]].map(function (x) { return '<div class="stat"><b>' + x[0] + '</b><span>' + x[1] + '</span></div>'; }).join("");
+  $("rtnote").textContent = "One core of a small cloud machine scores the whole network well inside the 60 seconds between readings, so the same design can grow to thousands of stations by adding cores. The edge layer is plain C++ with no heap use and compiled and tested on a PC.";
+})();
+</script>
+</body></html>

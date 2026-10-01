@@ -1,0 +1,680 @@
+{
+ "generated": "2026-09-30 12:30",
+ "stations": 57,
+ "test_days": 4,
+ "seeds": [
+  101,
+  202,
+  303
+ ],
+ "runs": [
+  {
+   "seed": 101,
+   "rows": [
+    {
+     "name": "Threshold QC only",
+     "injected": 180,
+     "detected": 155,
+     "alerts": 182,
+     "false_alarms": 0,
+     "recall": 0.861,
+     "precision": 1.0,
+     "f1": 0.925,
+     "false_alarms_per_station_day": 0.0,
+     "median_latency_min": 5.0,
+     "p90_latency_min": 306.59999999999974,
+     "genuine_events": 19,
+     "genuine_events_flagged": 0,
+     "genuine_kept_rate": 1.0,
+     "root_cause_accuracy": 0.0,
+     "per_type": {
+      "spike": {
+       "n": 20,
+       "recall": 0.85
+      },
+      "level_shift": {
+       "n": 38,
+       "recall": 0.658
+      },
+      "stuck": {
+       "n": 30,
+       "recall": 1.0
+      },
+      "drift": {
+       "n": 26,
+       "recall": 0.769
+      },
+      "noise_burst": {
+       "n": 22,
+       "recall": 0.864
+      },
+      "comm_error": {
+       "n": 21,
+       "recall": 1.0
+      },
+      "power_glitch": {
+       "n": 23,
+       "recall": 1.0
+      }
+     },
+     "confusion": {
+      "stuck->?": 30,
+      "level_shift->?": 25,
+      "noise_burst->?": 19,
+      "comm_error->?": 21,
+      "drift->?": 20,
+      "power_glitch->?": 23,
+      "spike->?": 17
+     }
+    },
+    {
+     "name": "Temporal AI only",
+     "injected": 180,
+     "detected": 147,
+     "alerts": 259,
+     "false_alarms": 71,
+     "recall": 0.817,
+     "precision": 0.726,
+     "f1": 0.769,
+     "false_alarms_per_station_day": 0.329,
+     "median_latency_min": 6.0,
+     "p90_latency_min": 381.4000000000001,
+     "genuine_events": 19,
+     "genuine_events_flagged": 11,
+     "genuine_kept_rate": 0.421,
+     "root_cause_accuracy": 0.0,
+     "per_type": {
+      "spike": {
+       "n": 20,
+       "recall": 0.95
+      },
+      "level_shift": {
+       "n": 38,
+       "recall": 0.974
+      },
+      "stuck": {
+       "n": 30,
+       "recall": 0.667
+      },
+      "drift": {
+       "n": 26,
+       "recall": 1.0
+      },
+      "noise_burst": {
+       "n": 22,
+       "recall": 1.0
+      },
+      "comm_error": {
+       "n": 21,
+       "recall": 0.0
+      },
+      "power_glitch": {
+       "n": 23,
+       "recall": 1.0
+      }
+     },
+     "confusion": {
+      "noise_burst->?": 22,
+      "level_shift->?": 37,
+      "stuck->?": 20,
+      "drift->?": 26,
+      "power_glitch->?": 23,
+      "spike->?": 19
+     }
+    },
+    {
+     "name": "TRINETRA (full)",
+     "injected": 180,
+     "detected": 179,
+     "alerts": 180,
+     "false_alarms": 1,
+     "recall": 0.994,
+     "precision": 0.994,
+     "f1": 0.994,
+     "false_alarms_per_station_day": 0.005,
+     "median_latency_min": 3.0,
+     "p90_latency_min": 61.20000000000002,
+     "genuine_events": 19,
+     "genuine_events_flagged": 0,
+     "genuine_kept_rate": 1.0,
+     "root_cause_accuracy": 0.989,
+     "per_type": {
+      "spike": {
+       "n": 20,
+       "recall": 0.95
+      },
+      "level_shift": {
+       "n": 38,
+       "recall": 1.0
+      },
+      "stuck": {
+       "n": 30,
+       "recall": 1.0
+      },
+      "drift": {
+       "n": 26,
+       "recall": 1.0
+      },
+      "noise_burst": {
+       "n": 22,
+       "recall": 1.0
+      },
+      "comm_error": {
+       "n": 21,
+       "recall": 1.0
+      },
+      "power_glitch": {
+       "n": 23,
+       "recall": 1.0
+      }
+     },
+     "confusion": {
+      "comm_error->spike": 1,
+      "level_shift->drift": 1
+     }
+    }
+   ],
+   "row_level": {
+    "auc": 0.9694565466026995,
+    "ap": 0.9355389978166584
+   }
+  },
+  {
+   "seed": 202,
+   "rows": [
+    {
+     "name": "Threshold QC only",
+     "injected": 162,
+     "detected": 135,
+     "alerts": 161,
+     "false_alarms": 0,
+     "recall": 0.833,
+     "precision": 1.0,
+     "f1": 0.909,
+     "false_alarms_per_station_day": 0.0,
+     "median_latency_min": 2.0,
+     "p90_latency_min": 286.6000000000001,
+     "genuine_events": 19,
+     "genuine_events_flagged": 0,
+     "genuine_kept_rate": 1.0,
+     "root_cause_accuracy": 0.0,
+     "per_type": {
+      "spike": {
+       "n": 24,
+       "recall": 0.75
+      },
+      "level_shift": {
+       "n": 35,
+       "recall": 0.686
+      },
+      "stuck": {
+       "n": 35,
+       "recall": 1.0
+      },
+      "drift": {
+       "n": 19,
+       "recall": 0.684
+      },
+      "noise_burst": {
+       "n": 15,
+       "recall": 0.733
+      },
+      "comm_error": {
+       "n": 24,
+       "recall": 1.0
+      },
+      "power_glitch": {
+       "n": 10,
+       "recall": 1.0
+      }
+     },
+     "confusion": {
+      "level_shift->?": 24,
+      "spike->?": 18,
+      "stuck->?": 35,
+      "drift->?": 13,
+      "comm_error->?": 24,
+      "power_glitch->?": 10,
+      "noise_burst->?": 11
+     }
+    },
+    {
+     "name": "Temporal AI only",
+     "injected": 162,
+     "detected": 118,
+     "alerts": 221,
+     "false_alarms": 66,
+     "recall": 0.728,
+     "precision": 0.701,
+     "f1": 0.715,
+     "false_alarms_per_station_day": 0.305,
+     "median_latency_min": 4.0,
+     "p90_latency_min": 390.4999999999999,
+     "genuine_events": 19,
+     "genuine_events_flagged": 11,
+     "genuine_kept_rate": 0.421,
+     "root_cause_accuracy": 0.0,
+     "per_type": {
+      "spike": {
+       "n": 24,
+       "recall": 0.875
+      },
+      "level_shift": {
+       "n": 35,
+       "recall": 1.0
+      },
+      "stuck": {
+       "n": 35,
+       "recall": 0.514
+      },
+      "drift": {
+       "n": 19,
+       "recall": 1.0
+      },
+      "noise_burst": {
+       "n": 15,
+       "recall": 1.0
+      },
+      "comm_error": {
+       "n": 24,
+       "recall": 0.0
+      },
+      "power_glitch": {
+       "n": 10,
+       "recall": 1.0
+      }
+     },
+     "confusion": {
+      "level_shift->?": 35,
+      "spike->?": 21,
+      "stuck->?": 18,
+      "drift->?": 19,
+      "noise_burst->?": 15,
+      "power_glitch->?": 10
+     }
+    },
+    {
+     "name": "TRINETRA (full)",
+     "injected": 162,
+     "detected": 162,
+     "alerts": 163,
+     "false_alarms": 0,
+     "recall": 1.0,
+     "precision": 1.0,
+     "f1": 1.0,
+     "false_alarms_per_station_day": 0.0,
+     "median_latency_min": 3.0,
+     "p90_latency_min": 35.50000000000003,
+     "genuine_events": 19,
+     "genuine_events_flagged": 0,
+     "genuine_kept_rate": 1.0,
+     "root_cause_accuracy": 0.994,
+     "per_type": {
+      "spike": {
+       "n": 24,
+       "recall": 1.0
+      },
+      "level_shift": {
+       "n": 35,
+       "recall": 1.0
+      },
+      "stuck": {
+       "n": 35,
+       "recall": 1.0
+      },
+      "drift": {
+       "n": 19,
+       "recall": 1.0
+      },
+      "noise_burst": {
+       "n": 15,
+       "recall": 1.0
+      },
+      "comm_error": {
+       "n": 24,
+       "recall": 1.0
+      },
+      "power_glitch": {
+       "n": 10,
+       "recall": 1.0
+      }
+     },
+     "confusion": {
+      "level_shift->drift": 1
+     }
+    }
+   ],
+   "row_level": {
+    "auc": 0.9757845532218015,
+    "ap": 0.9449787320133046
+   }
+  },
+  {
+   "seed": 303,
+   "rows": [
+    {
+     "name": "Threshold QC only",
+     "injected": 208,
+     "detected": 169,
+     "alerts": 202,
+     "false_alarms": 0,
+     "recall": 0.812,
+     "precision": 1.0,
+     "f1": 0.897,
+     "false_alarms_per_station_day": 0.0,
+     "median_latency_min": 0.0,
+     "p90_latency_min": 67.80000000000058,
+     "genuine_events": 24,
+     "genuine_events_flagged": 0,
+     "genuine_kept_rate": 1.0,
+     "root_cause_accuracy": 0.0,
+     "per_type": {
+      "spike": {
+       "n": 37,
+       "recall": 0.784
+      },
+      "level_shift": {
+       "n": 37,
+       "recall": 0.784
+      },
+      "stuck": {
+       "n": 27,
+       "recall": 1.0
+      },
+      "drift": {
+       "n": 27,
+       "recall": 0.407
+      },
+      "noise_burst": {
+       "n": 25,
+       "recall": 0.72
+      },
+      "comm_error": {
+       "n": 27,
+       "recall": 1.0
+      },
+      "power_glitch": {
+       "n": 28,
+       "recall": 1.0
+      }
+     },
+     "confusion": {
+      "comm_error->?": 27,
+      "spike->?": 29,
+      "power_glitch->?": 28,
+      "drift->?": 11,
+      "stuck->?": 27,
+      "level_shift->?": 29,
+      "noise_burst->?": 18
+     }
+    },
+    {
+     "name": "Temporal AI only",
+     "injected": 208,
+     "detected": 167,
+     "alerts": 234,
+     "false_alarms": 30,
+     "recall": 0.803,
+     "precision": 0.872,
+     "f1": 0.836,
+     "false_alarms_per_station_day": 0.139,
+     "median_latency_min": 3.0,
+     "p90_latency_min": 325.0000000000001,
+     "genuine_events": 24,
+     "genuine_events_flagged": 5,
+     "genuine_kept_rate": 0.792,
+     "root_cause_accuracy": 0.0,
+     "per_type": {
+      "spike": {
+       "n": 37,
+       "recall": 0.973
+      },
+      "level_shift": {
+       "n": 37,
+       "recall": 0.946
+      },
+      "stuck": {
+       "n": 27,
+       "recall": 0.63
+      },
+      "drift": {
+       "n": 27,
+       "recall": 0.963
+      },
+      "noise_burst": {
+       "n": 25,
+       "recall": 1.0
+      },
+      "comm_error": {
+       "n": 27,
+       "recall": 0.0
+      },
+      "power_glitch": {
+       "n": 28,
+       "recall": 1.0
+      }
+     },
+     "confusion": {
+      "spike->?": 36,
+      "power_glitch->?": 28,
+      "drift->?": 26,
+      "level_shift->?": 35,
+      "stuck->?": 17,
+      "noise_burst->?": 25
+     }
+    },
+    {
+     "name": "TRINETRA (full)",
+     "injected": 208,
+     "detected": 206,
+     "alerts": 209,
+     "false_alarms": 0,
+     "recall": 0.99,
+     "precision": 1.0,
+     "f1": 0.995,
+     "false_alarms_per_station_day": 0.0,
+     "median_latency_min": 3.0,
+     "p90_latency_min": 73.5,
+     "genuine_events": 24,
+     "genuine_events_flagged": 0,
+     "genuine_kept_rate": 1.0,
+     "root_cause_accuracy": 0.995,
+     "per_type": {
+      "spike": {
+       "n": 37,
+       "recall": 0.973
+      },
+      "level_shift": {
+       "n": 37,
+       "recall": 1.0
+      },
+      "stuck": {
+       "n": 27,
+       "recall": 1.0
+      },
+      "drift": {
+       "n": 27,
+       "recall": 0.963
+      },
+      "noise_burst": {
+       "n": 25,
+       "recall": 1.0
+      },
+      "comm_error": {
+       "n": 27,
+       "recall": 1.0
+      },
+      "power_glitch": {
+       "n": 28,
+       "recall": 1.0
+      }
+     },
+     "confusion": {
+      "noise_burst->level_shift": 1
+     }
+    }
+   ],
+   "row_level": {
+    "auc": 0.9579791869338972,
+    "ap": 0.9106042363969789
+   }
+  }
+ ],
+ "summary": {
+  "Threshold QC only": {
+   "recall": 0.835,
+   "precision": 1.0,
+   "f1": 0.91,
+   "false_alarms_per_station_day": 0.0,
+   "median_latency_min": 2.333,
+   "p90_latency_min": 220.333,
+   "genuine_kept_rate": 1.0,
+   "root_cause_accuracy": 0.0,
+   "injected": 550,
+   "detected": 459,
+   "false_alarms": 0,
+   "alerts": 545
+  },
+  "Temporal AI only": {
+   "recall": 0.783,
+   "precision": 0.766,
+   "f1": 0.773,
+   "false_alarms_per_station_day": 0.258,
+   "median_latency_min": 4.333,
+   "p90_latency_min": 365.633,
+   "genuine_kept_rate": 0.545,
+   "root_cause_accuracy": 0.0,
+   "injected": 550,
+   "detected": 432,
+   "false_alarms": 167,
+   "alerts": 714
+  },
+  "TRINETRA (full)": {
+   "recall": 0.995,
+   "precision": 0.998,
+   "f1": 0.996,
+   "false_alarms_per_station_day": 0.002,
+   "median_latency_min": 3.0,
+   "p90_latency_min": 56.733,
+   "genuine_kept_rate": 1.0,
+   "root_cause_accuracy": 0.993,
+   "injected": 550,
+   "detected": 547,
+   "false_alarms": 1,
+   "alerts": 552
+  },
+  "per_type": {
+   "spike": {
+    "n": 81,
+    "recall": 0.975
+   },
+   "level_shift": {
+    "n": 110,
+    "recall": 1.0
+   },
+   "stuck": {
+    "n": 92,
+    "recall": 1.0
+   },
+   "drift": {
+    "n": 72,
+    "recall": 0.986
+   },
+   "noise_burst": {
+    "n": 62,
+    "recall": 1.0
+   },
+   "comm_error": {
+    "n": 72,
+    "recall": 1.0
+   },
+   "power_glitch": {
+    "n": 61,
+    "recall": 1.0
+   }
+  }
+ },
+ "stress": {
+  "No neighbours (physics + AI only)": {
+   "recall": 1.0,
+   "precision": 0.934,
+   "f1": 0.966,
+   "false_alarms_per_station_day": 0.079,
+   "median_latency_min": 3.0,
+   "genuine_kept_rate": 0.762,
+   "root_cause_accuracy": 0.834,
+   "injected": 199
+  },
+  "Dense faults (2.5 per station-day)": {
+   "recall": 0.998,
+   "precision": 0.985,
+   "f1": 0.992,
+   "false_alarms_per_station_day": 0.037,
+   "median_latency_min": 3.0,
+   "genuine_kept_rate": 0.812,
+   "root_cause_accuracy": 0.979,
+   "injected": 523
+  }
+ },
+ "stress_baseline": {
+  "No neighbours (physics + AI only)": {
+   "recall": 0.824,
+   "precision": 1.0,
+   "f1": 0.904,
+   "false_alarms_per_station_day": 0.0,
+   "median_latency_min": 1.0,
+   "genuine_kept_rate": 1.0,
+   "root_cause_accuracy": 0.0,
+   "injected": 199
+  },
+  "Dense faults (2.5 per station-day)": {
+   "recall": 0.866,
+   "precision": 0.992,
+   "f1": 0.925,
+   "false_alarms_per_station_day": 0.019,
+   "median_latency_min": 2.0,
+   "genuine_kept_rate": 0.875,
+   "root_cause_accuracy": 0.0,
+   "injected": 523
+  }
+ },
+ "health_test": [
+  {
+   "station": "AWS-PUN-003",
+   "var": "P",
+   "true_rate": 0.3,
+   "est_rate": 0.295,
+   "status": "degraded",
+   "bias": 0.81,
+   "days_to_limit": 0.6
+  },
+  {
+   "station": "AWS-DEL-014",
+   "var": "T",
+   "true_rate": 0.35,
+   "est_rate": 0.366,
+   "status": "degraded",
+   "bias": 0.92,
+   "days_to_limit": 0.2
+  },
+  {
+   "station": "AWS-KOL-005",
+   "var": "RH",
+   "true_rate": -1.2,
+   "est_rate": -0.874,
+   "status": "watch",
+   "bias": -2.21,
+   "days_to_limit": 3.2
+  }
+ ],
+ "streaming": {
+  "stations": 57,
+  "window_min": 150,
+  "ms_median": 584.2,
+  "ms_p95": 703.1,
+  "ms_max": 794.5,
+  "batch_alerts": 11,
+  "stream_alerts": 11,
+  "identical": 11
+ }
+}

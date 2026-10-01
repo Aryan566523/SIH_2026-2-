@@ -1,0 +1,499 @@
+<title>TRINETRA Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: 3 columns. Left = alert queue + station map. Centre = live T/P/RH traces + repair ticket. Right = why it was flagged. Dark-first control-room look. */
+:root {
+  --bg: #0a1216; --panel: #101c22; --panel2: #15252d; --line: #22363f;
+  --fg: #e6f0f2; --muted: #8ba3ab; --faint: #5c757e;
+  --accent: #4fd8c4; --accent-ink: #04231f;
+  --high: #ff6060; --med: #f5a524; --ok: #4ecb8a; --real: #7aa8ff;
+  --land: #13262e; --grid: #1a2d35;
+  --display: "Schibsted Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #edf2f4; --panel: #ffffff; --panel2: #f2f6f7; --line: #d3dfe3;
+    --fg: #0d1f26; --muted: #55707b; --faint: #7f939b;
+    --accent: #0a8f80; --accent-ink: #ffffff;
+    --high: #d42e2e; --med: #a8640a; --ok: #1b8a52; --real: #2f62d0;
+    --land: #e3ecef; --grid: #d9e5e9;
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #edf2f4; --panel: #ffffff; --panel2: #f2f6f7; --line: #d3dfe3;
+  --fg: #0d1f26; --muted: #55707b; --faint: #7f939b;
+  --accent: #0a8f80; --accent-ink: #ffffff;
+  --high: #d42e2e; --med: #a8640a; --ok: #1b8a52; --real: #2f62d0;
+  --land: #e3ecef; --grid: #d9e5e9;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--display); font-size: 14px; line-height: 1.45; padding-inline: 20px; padding-block: 18px 28px; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.wrap { max-width: 1560px; margin-inline: auto; display: flex; flex-direction: column; gap: 16px; }
+
+/* top bar */
+.top { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.brand svg { flex: none; }
+.brand h1 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: .22em; line-height: 1; }
+.brand p { margin: 4px 0 0; font-size: 11.5px; color: var(--muted); letter-spacing: .02em; }
+.live { display: inline-flex; align-items: center; gap: 8px; font: 500 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.live i { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 0 var(--ok); animation: ping 2s infinite; }
+@keyframes ping { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ok) 60%, transparent); } 80%,100% { box-shadow: 0 0 0 8px transparent; } }
+.kpis { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+.kpi { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 7px 14px; min-width: 112px; }
+.kpi b { display: block; font: 600 20px/1.1 var(--mono); }
+.kpi span { font-size: 11px; color: var(--muted); }
+.kpi.high b { color: var(--high); } .kpi.real b { color: var(--real); } .kpi.ok b { color: var(--ok); }
+
+/* grid */
+.grid { display: grid; grid-template-columns: 340px minmax(0, 1fr) 380px; gap: 16px; align-items: start; }
+.col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; min-width: 0; }
+.ph { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.ph h2 { margin: 0; font: 600 11px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.ph small { font: 400 11px var(--mono); color: var(--faint); }
+
+/* alert queue */
+.queue { display: flex; flex-direction: column; gap: 6px; }
+.st { display: grid; grid-template-columns: 4px 1fr auto; gap: 10px; align-items: center; text-align: left; width: 100%; background: var(--panel2); border: 1px solid transparent; border-radius: 8px; padding: 9px 10px 9px 0; overflow: hidden; }
+.st:hover { border-color: var(--line); }
+.st[aria-pressed="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--panel2)); }
+.st .bar { align-self: stretch; background: var(--ok); }
+.st.high .bar { background: var(--high); } .st.medium .bar { background: var(--med); } .st.event .bar { background: var(--real); }
+.st .id { font: 600 12.5px var(--mono); }
+.st .msg { font-size: 12px; color: var(--muted); margin-top: 1px; }
+.st.compact .msg { display: none; }
+.pill { font: 600 10px var(--mono); letter-spacing: .08em; padding: 2px 7px; border-radius: 99px; text-transform: uppercase; white-space: nowrap; border: 1px solid currentColor; }
+.pill.high { color: var(--high); background: color-mix(in srgb, var(--high) 14%, transparent); }
+.pill.medium { color: var(--med); background: color-mix(in srgb, var(--med) 14%, transparent); }
+.pill.ok { color: var(--ok); background: color-mix(in srgb, var(--ok) 12%, transparent); }
+.pill.event { color: var(--real); background: color-mix(in srgb, var(--real) 14%, transparent); }
+.st.flash { animation: flash 1.4s ease-out; }
+@keyframes flash { 0% { background: color-mix(in srgb, var(--high) 30%, var(--panel2)); } 100% { background: var(--panel2); } }
+
+/* map */
+.map { width: 100%; height: auto; display: block; }
+.map text { font: 500 8px var(--mono); fill: var(--muted); }
+.map .node { cursor: pointer; }
+.legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 11px; color: var(--muted); margin-top: 8px; }
+.legend i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+
+/* centre */
+.head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.head h2 { margin: 0; font: 700 26px/1.1 var(--mono); letter-spacing: -.01em; }
+.head .sub { color: var(--muted); font-size: 12.5px; margin-top: 4px; }
+.head .right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.conf { font: 500 12px var(--mono); color: var(--muted); }
+.conf b { color: var(--fg); font-weight: 600; }
+.demo { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; border-top: 1px dashed var(--line); margin-top: 12px; padding-top: 12px; }
+.demo > span { font: 600 10.5px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
+.seg { background: var(--panel2); border: 1px solid var(--line); border-radius: 6px; padding: 5px 11px; font-size: 12px; }
+.seg:hover { border-color: var(--accent); }
+.seg.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+.charts { display: flex; flex-direction: column; gap: 10px; }
+.chart { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 6px 14px; align-items: center; }
+.chart + .chart { border-top: 1px solid var(--line); padding-top: 10px; }
+.cmeta .name { font: 600 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.cmeta .val { font: 600 30px/1.15 var(--mono); margin-top: 2px; }
+.cmeta .val small { font-size: 13px; color: var(--muted); font-weight: 500; }
+.cmeta .dev { font: 500 12px var(--mono); margin-top: 2px; color: var(--muted); }
+.cmeta .dev.bad { color: var(--high); } .cmeta .dev.warn { color: var(--med); }
+.chart svg { width: 100%; height: auto; display: block; }
+.chart svg text { font: 400 13px var(--mono); fill: var(--faint); }
+.key { display: flex; gap: 16px; font-size: 11.5px; color: var(--muted); margin-top: 8px; flex-wrap: wrap; }
+.key span { display: inline-flex; align-items: center; gap: 6px; }
+.key svg { width: 22px; height: 8px; }
+
+.ticket { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.ticket > div { background: var(--panel); padding: 10px 12px; min-width: 0; }
+.ticket dt { font: 600 10px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.ticket dd { margin: 0; font-size: 13px; overflow-wrap: anywhere; }
+.ticket dd.big { font: 600 15px var(--mono); }
+.ticket .arrow { color: var(--faint); margin-inline: 4px; }
+.ticket .good { color: var(--ok); }
+.tk-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.tk-no { font: 500 11px var(--mono); color: var(--faint); }
+
+/* right column */
+.quote { font-size: 15.5px; line-height: 1.5; font-weight: 500; margin: 0 0 14px; }
+.quote mark { background: none; color: var(--accent); font-weight: 700; }
+.meter { margin-bottom: 14px; }
+.mlabels { display: flex; justify-content: space-between; font: 600 10.5px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.track { position: relative; height: 10px; border-radius: 99px; background: linear-gradient(90deg, color-mix(in srgb, var(--real) 70%, transparent), var(--panel2) 50%, color-mix(in srgb, var(--high) 75%, transparent)); border: 1px solid var(--line); }
+.track i { position: absolute; top: -5px; width: 4px; height: 18px; border-radius: 2px; background: var(--fg); transform: translateX(-2px); transition: left .5s; }
+.checks { display: flex; flex-direction: column; }
+.check { display: grid; grid-template-columns: 22px 1fr; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); }
+.check:first-child { border-top: 0; padding-top: 0; }
+.check .ic { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font: 700 11px var(--mono); color: var(--bg); background: var(--ok); margin-top: 1px; }
+.check.fail .ic { background: var(--high); } .check.warn .ic { background: var(--real); } .check.na .ic { background: var(--faint); }
+.check h3 { margin: 0; font-size: 13px; font-weight: 600; display: flex; gap: 8px; align-items: baseline; justify-content: space-between; flex-wrap: wrap; }
+.check h3 span { font: 500 10.5px var(--mono); color: var(--faint); letter-spacing: .04em; }
+.check p { margin: 2px 0 0; font-size: 12.5px; color: var(--muted); }
+.drivers { display: flex; flex-direction: column; gap: 7px; }
+.drv { display: grid; grid-template-columns: 150px minmax(0, 1fr) 40px; gap: 8px; align-items: center; font-size: 12px; color: var(--muted); }
+.drv .b { height: 6px; background: var(--panel2); border-radius: 3px; overflow: hidden; }
+.drv .b i { display: block; height: 100%; background: var(--accent); border-radius: 3px; transition: width .5s; }
+.drv em { font: 500 11px var(--mono); font-style: normal; text-align: right; color: var(--fg); }
+.foot { font-size: 11.5px; color: var(--faint); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+
+@media (max-width: 1260px) { .grid { grid-template-columns: 320px minmax(0, 1fr); } .grid .col:nth-child(3) { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; } }
+@media (max-width: 860px) { .grid { grid-template-columns: minmax(0, 1fr); } .grid .col:nth-child(3) { grid-template-columns: minmax(0, 1fr); } .kpis { margin-left: 0; } .ticket { grid-template-columns: repeat(2, minmax(0, 1fr)); } .chart { grid-template-columns: minmax(0, 1fr); } .cmeta { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; } .drv { grid-template-columns: 110px minmax(0, 1fr) 40px; } }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" fill="none" stroke="var(--accent)" stroke-width="1.6"/><circle cx="20" cy="11" r="3.4" fill="var(--accent)"/><circle cx="11.5" cy="25.5" r="3.4" fill="var(--accent)"/><circle cx="28.5" cy="25.5" r="3.4" fill="var(--accent)"/><path d="M20 11 11.5 25.5h17Z" fill="none" stroke="var(--accent)" stroke-width="1" opacity=".55"/></svg>
+      <div><h1>TRINETRA</h1><p>Tri-parameter Real-time Intelligent NEtwork for Trustworthy Reliable Atmospheric data</p></div>
+    </div>
+    <span class="live"><i></i>Station health · live</span>
+    <div class="kpis" id="kpis"></div>
+  </header>
+
+  <main class="grid">
+    <div class="col">
+      <section class="panel"><div class="ph"><h2>Alert queue</h2><small id="qcount"></small></div><div class="queue" id="queue"></div></section>
+      <section class="panel"><div class="ph"><h2>Station map</h2><small>ring = 100 km</small></div><div id="map"></div>
+        <div class="legend"><span><i style="background:var(--high)"></i>Sensor fault</span><span><i style="background:var(--med)"></i>Needs calibration</span><span><i style="background:var(--real)"></i>Real weather</span><span><i style="background:var(--ok)"></i>OK</span></div></section>
+    </div>
+
+    <div class="col">
+      <section class="panel">
+        <div class="head" id="head"></div>
+        <div class="demo" id="demo"></div>
+      </section>
+      <section class="panel">
+        <div class="ph"><h2>Last 2 hours · 1-minute readings · IST</h2><small>station vs nearby stations</small></div>
+        <div class="charts" id="charts"></div>
+        <div class="key">
+          <span><svg viewBox="0 0 22 8"><line x1="0" y1="4" x2="22" y2="4" stroke="var(--accent)" stroke-width="2"/></svg>This station</span>
+          <span><svg viewBox="0 0 22 8"><line x1="0" y1="4" x2="22" y2="4" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 3"/></svg>Median of nearby stations</span>
+          <span><svg viewBox="0 0 22 8"><rect width="22" height="8" rx="2" fill="var(--muted)" opacity=".25"/></svg>Spread of nearby stations</span>
+        </div>
+      </section>
+      <section class="panel"><div class="tk-head"><div class="ph" style="margin:0"><h2>Repair ticket</h2></div><span class="tk-no" id="tkno"></span></div><dl class="ticket" id="ticket" style="margin:0"></dl></section>
+    </div>
+
+    <div class="col">
+      <section class="panel"><div class="ph"><h2>Why this alert</h2><small id="whytime"></small></div><p class="quote" id="quote"></p>
+        <div class="meter"><div class="mlabels"><span>Real weather</span><span id="mval"></span><span>Sensor fault</span></div><div class="track"><i id="mark" style="left:50%"></i></div></div>
+        <div class="checks" id="checks"></div></section>
+      <section class="panel"><div class="ph"><h2>What drove the alert</h2><small>share of evidence</small></div><div class="drivers" id="drivers"></div></section>
+    </div>
+  </main>
+  <div class="foot"><span>Sample data for the TRINETRA interface concept. Faults are injected into simulated readings, and AI scores are simulated for this mock-up.</span><span>Team Secure OOPS · SIH26073 · IMD, Ministry of Earth Sciences</span></div>
+</div>
+
+<script>
+(function () {
+  var N = 120, B = 30, T0MIN = 14 * 60;
+  function rng(seed) { var a = seed >>> 0; return function () { a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  function gauss(r) { var u = 1 - r(), v = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+  function hash(s) { var h = 2166136261; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+  function es(T) { return 6.112 * Math.exp(17.67 * T / (T + 243.5)); }
+  function dewpt(T, rh) { var e = Math.max(rh, 0.5) / 100 * es(T), g = Math.log(e / 6.112); return 243.5 * g / (17.67 - g); }
+  function clamp(x, a, b) { return Math.max(a, Math.min(b, x)); }
+  function smooth(x) { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); }
+  function med(a) { var b = a.slice().sort(function (x, y) { return x - y; }); var m = b.length >> 1; return b.length % 2 ? b[m] : (b[m - 1] + b[m]) / 2; }
+  function mean(a) { var s = 0; a.forEach(function (x) { s += x; }); return s / a.length; }
+  function sd(a) { var m = mean(a), s = 0; a.forEach(function (x) { s += (x - m) * (x - m); }); return Math.sqrt(s / a.length); }
+  function f(x, d) { return (x < 0 ? "−" : "") + Math.abs(x).toFixed(d == null ? 1 : d); }
+  function sg(x, d) { return (x < 0 ? "−" : "+") + Math.abs(x).toFixed(d == null ? 1 : d); }
+  function clock(i) { var m = T0MIN + i; return String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0"); }
+  function hav(a, b) { var R = 6371, d2r = Math.PI / 180, dl = (b[1] - a[1]) * d2r, dn = (b[0] - a[0]) * d2r; var x = Math.sin(dl / 2) * Math.sin(dl / 2) + Math.cos(a[1] * d2r) * Math.cos(b[1] * d2r) * Math.sin(dn / 2) * Math.sin(dn / 2); return 2 * R * Math.asin(Math.sqrt(x)); }
+
+  var VARS = ["T", "P", "RH"];
+  var META = { T: { name: "Temperature", unit: "°C", d: 1, sig: 0.35, lo: -10, hi: 50, step: 3, sensor: "Temperature probe" }, P: { name: "Pressure", unit: "hPa", d: 1, sig: 0.25, lo: 500, hi: 1080, step: 1.5, sensor: "Barometer" }, RH: { name: "Humidity", unit: "%", d: 0, sig: 2, lo: 0, hi: 100, step: 15, sensor: "Humidity sensor" } };
+
+  var STATIONS = [
+    { id: "AWS-DEL-014", city: "Delhi", code: "DEL", lon: 77.2, lat: 28.6, T0: 38, Td: 10, P0: 990, tr: -1.2, scn: "spike", lx: 7, ly: -6 },
+    { id: "AWS-PUN-003", city: "Pune", code: "PUN", lon: 73.86, lat: 18.52, T0: 31, Td: 16, P0: 942, tr: -0.8, scn: "drift", lx: 7, ly: 11 },
+    { id: "AWS-CHN-021", city: "Chennai", code: "CHN", lon: 80.27, lat: 13.08, T0: 31, Td: 23, P0: 1008, tr: -0.5, scn: "storm", lx: 8, ly: 3 },
+    { id: "AWS-MUM-007", city: "Mumbai", code: "MUM", lon: 72.88, lat: 19.08, T0: 32, Td: 24, P0: 1007, tr: -0.6, scn: null, lx: -26, ly: -3 },
+    { id: "AWS-JPR-011", city: "Jaipur", code: "JPR", lon: 75.79, lat: 26.91, T0: 36, Td: 12, P0: 975, tr: -1.0, scn: null, lx: -26, ly: 3 },
+    { id: "AWS-HYD-019", city: "Hyderabad", code: "HYD", lon: 78.48, lat: 17.39, T0: 33, Td: 18, P0: 955, tr: -0.9, scn: null, lx: 8, ly: -4 },
+    { id: "AWS-KOL-005", city: "Kolkata", code: "KOL", lon: 88.36, lat: 22.57, T0: 33, Td: 25, P0: 1005, tr: -0.4, scn: null, lx: -26, ly: 3 },
+    { id: "AWS-BLR-012", city: "Bengaluru", code: "BLR", lon: 77.59, lat: 12.97, T0: 28, Td: 17, P0: 910, tr: -0.7, scn: null, lx: -28, ly: 9 }
+  ];
+  var START = { spike: 92, stuck: 70, drift: 15, storm: 82 };
+
+  STATIONS.forEach(function (s) {
+    var r = rng(hash(s.id + "sat"));
+    s.sats = [];
+    for (var k = 0; k < 4; k++) {
+      var lon = s.lon + (r() - 0.5) * 0.9, lat = s.lat + (r() - 0.5) * 0.9;
+      s.sats.push({ id: "AWS-" + s.code + "-" + String(30 + k * 7 + Math.floor(r() * 5)).padStart(3, "0"), lon: lon, lat: lat, km: hav([s.lon, s.lat], [lon, lat]), oT: (r() - 0.5) * 1.6, oP: (r() - 0.5) * 2, oTd: (r() - 0.5) * 1.2 });
+    }
+  });
+
+  function truth(s, i, storm) {
+    var ph = (hash(s.code) % 7) / 3;
+    var T = s.T0 + s.tr * (i / N) + 0.9 * Math.sin(i / 30 + ph);
+    var P = s.P0 - 0.5 * (i / N) + 0.25 * Math.sin(i / 30 + ph);
+    var Td = s.Td + 0.3 * Math.sin(i / 40 + ph);
+    if (storm) { var a = smooth((i - START.storm) / 12); T -= 5.5 * a; Td += 0.5 * a; P -= 1.6 * smooth((i - START.storm) / 18); }
+    return { T: T, P: P, Td: Td };
+  }
+
+  function simulate(s) {
+    var storm = s.scn === "storm";
+    var r = rng(hash(s.id + (s.scn || "none") + "x"));
+    var S = { T: [], P: [], RH: [] }, i, tr;
+    for (i = 0; i < N; i++) {
+      tr = truth(s, i, storm);
+      var T = tr.T + 0.08 * gauss(r), P = tr.P + 0.04 * gauss(r), RH = clamp(100 * es(tr.Td) / es(tr.T) + 0.4 * gauss(r), 1, 100);
+      if (s.scn === "spike") T += 17 * clamp((i - 91) / 2, 0, 1);
+      if (s.scn === "drift" && i > START.drift) P += 0.04 * (i - START.drift);
+      S.T.push(T); S.P.push(P); S.RH.push(RH);
+    }
+    if (s.scn === "stuck") for (i = START.stuck; i < N; i++) { S.T[i] = S.T[START.stuck - 1]; S.RH[i] = S.RH[START.stuck - 1]; }
+    var NB = { T: [], P: [], RH: [] };
+    s.sats.forEach(function (n, k) {
+      var rr = rng(hash(n.id)), a = { T: [], P: [], RH: [] };
+      for (var j = 0; j < N; j++) {
+        var t = truth(s, j, storm), Tn = t.T + n.oT + 0.12 * Math.sin(j / 17 + k) + 0.08 * gauss(rr), Tdn = t.Td + n.oTd;
+        a.T.push(Tn); a.P.push(t.P + n.oP + 0.04 * gauss(rr)); a.RH.push(clamp(100 * es(Tdn) / es(Tn) + 0.4 * gauss(rr), 1, 100));
+      }
+      VARS.forEach(function (v) { NB[v].push(a[v]); });
+    });
+    return { S: S, NB: NB };
+  }
+
+  function sustained(flags, need) { var run = 0; for (var i = 0; i < flags.length; i++) { run = flags[i] ? run + 1 : 0; if (run >= need) return i - need + 1; } return -1; }
+
+  function analyze(s) {
+    var d = simulate(s), S = d.S, NB = d.NB, R = { d: d, v: {} };
+    var i, v;
+    var nbMed = {}, nbLo = {}, nbHi = {};
+    VARS.forEach(function (v) {
+      nbMed[v] = []; nbLo[v] = []; nbHi[v] = [];
+      for (var i = 0; i < N; i++) { var col = NB[v].map(function (a) { return a[i]; }); nbMed[v].push(med(col)); nbLo[v].push(Math.min.apply(null, col)); nbHi[v].push(Math.max.apply(null, col)); }
+    });
+    R.nbMed = nbMed; R.nbLo = nbLo; R.nbHi = nbHi;
+
+    VARS.forEach(function (v) {
+      var m = META[v], x = S[v], o = {};
+      var diffs = []; for (i = 0; i < B; i++) diffs.push(x[i] - nbMed[v][i]);
+      o.off = mean(diffs);
+      o.dev = x.map(function (q, k) { return q - nbMed[v][k] - o.off; });
+      var sig = Math.max(m.sig, sd(o.dev.slice(0, B)));
+      o.z = o.dev.map(function (q) { return q / sig; });
+      var nf = o.z.map(function (q) { return Math.abs(q) > 5; });
+      o.nbOnset = sustained(nf, 3);
+      o.nbActive = nf.slice(N - 10).filter(Boolean).length >= 6;
+      o.zEnd = Math.max.apply(null, o.z.slice(N - 10).map(Math.abs));
+      // station quick check
+      o.qc = { range: -1, step: -1, stuck: -1 };
+      for (i = 0; i < N; i++) {
+        if (o.qc.range < 0 && (x[i] > m.hi || x[i] < m.lo)) o.qc.range = i;
+        if (i > 0 && o.qc.step < 0 && Math.abs(x[i] - x[i - 1]) > m.step) o.qc.step = i;
+        if (i >= 19 && o.qc.stuck < 0 && Math.max.apply(null, x.slice(i - 19, i + 1)) - Math.min.apply(null, x.slice(i - 19, i + 1)) === 0) o.qc.stuck = i;
+      }
+      o.qcRangeNow = x[N - 1] > m.hi || x[N - 1] < m.lo;
+      o.qcStuckNow = o.qc.stuck >= 0;
+      o.qcStepRecent = o.qc.step >= N - 30;
+      // AI: departure from own recent history
+      var ai = x.map(function (q, k) { return k < 60 ? 0 : Math.abs(q - med(x.slice(k - 60, k - 29))) / ({ T: 1, P: 0.5, RH: 6 })[v]; });
+      o.ai = ai; o.aiEnd = Math.max.apply(null, ai.slice(N - 12));
+      R.v[v] = o;
+    });
+    // physics: dew-point coherence of T and RH
+    var Tdm = S.T.map(function (t, k) { return dewpt(t, S.RH[k]); });
+    var tdBase = mean(Tdm.slice(0, B));
+    R.tdBase = tdBase; R.tdNow = Tdm[N - 1]; R.Tdm = Tdm;
+    var pf = Tdm.map(function (q) { return Math.abs(q - tdBase) > 4; });
+    R.physOnset = sustained(pf, 2); R.physActive = pf[N - 1];
+    R.aiScore = 1 - Math.exp(-Math.max(R.v.T.aiEnd, R.v.P.aiEnd, R.v.RH.aiEnd) / 4);
+    R.aiOn = R.aiScore > 0.6;
+
+    var faultVars = VARS.filter(function (v) { return R.v[v].nbActive || R.v[v].qcStuckNow || R.v[v].qcRangeNow; });
+    var out = { status: "ok", sev: "ok" };
+    if (faultVars.length) {
+      out.status = "fault";
+      var prim = faultVars.slice().sort(function (a, b) { return R.v[b].zEnd - R.v[a].zEnd; })[0];
+      var stuckVars = VARS.filter(function (v) { return R.v[v].qcStuckNow; });
+      var type;
+      if (stuckVars.length) { type = "stuck"; faultVars = stuckVars; prim = stuckVars.indexOf("T") >= 0 ? "T" : stuckVars[0]; }
+      else {
+        var o = R.v[prim], on = Math.max(0, o.nbOnset), fin = Math.abs(o.dev[N - 1]), reach = on;
+        while (reach < N && Math.abs(o.dev[reach]) < 0.8 * fin) reach++;
+        type = (reach - on) < 10 ? "spike" : "drift";
+      }
+      out.type = type; out.prim = prim; out.vars = faultVars;
+      var starts = [];
+      faultVars.forEach(function (v) { var o = R.v[v]; [o.nbOnset, o.qc.range, o.qc.step, o.qc.stuck].forEach(function (q) { if (q >= 0) starts.push(q); }); });
+      out.detectIdx = Math.min.apply(null, starts);
+      out.onsetIdx = type === "stuck" ? Math.max(0, R.v[prim].qc.stuck - 19) : (START[s.scn] != null ? START[s.scn] : out.detectIdx);
+      out.sev = (type === "drift") ? "medium" : "high";
+      out.conf = clamp(0.62 + 0.36 * Math.min(1, R.v[prim].zEnd / 12) + (R.v[prim].qcRangeNow || R.v[prim].qcStuckNow ? 0.02 : 0), 0, 0.99);
+      out.corr = faultVars.map(function (v) { return { v: v, was: S[v][N - 1], now: nbMed[v][N - 1] + R.v[v].off }; });
+    } else if (R.aiOn || R.physActive) {
+      out.status = "event"; out.sev = "ok"; out.conf = clamp(0.7 + 0.28 * R.aiScore, 0, 0.98);
+      var ev = []; VARS.forEach(function (v) { for (var k = 60; k < N; k++) if (R.v[v].ai[k] > 3) { ev.push(k); break; } });
+      out.detectIdx = ev.length ? Math.min.apply(null, ev) : N - 15; out.onsetIdx = START.storm;
+    }
+    R.out = out; return R;
+  }
+
+  function sentence(s, R) {
+    var o = R.out, n = s.sats.length, maxkm = Math.max.apply(null, s.sats.map(function (q) { return q.km; })).toFixed(0);
+    var V = R.d.S;
+    if (o.status === "fault") {
+      var p = o.prim, m = META[p], rv = R.v[p];
+      if (o.type === "stuck") return { html: "Flagged: <mark>temperature and humidity have not changed for " + (N - o.onsetIdx) + " minutes</mark> while " + n + " nearby stations kept moving.", plain: "" };
+      if (o.type === "spike") { var dv = rv.dev[N - 1]; return { html: "Flagged: <mark>" + m.name.toLowerCase() + " jumped " + f(Math.abs(V[p][N - 1] - V[p][Math.max(0, o.onsetIdx - 1)]), 1) + " " + m.unit + " in 2 minutes</mark> while humidity did not change to match, and " + n + " nearby stations stayed normal.", plain: "" }; }
+      return { html: "Flagged: <mark>" + m.name.toLowerCase() + " has crept " + sg(rv.dev[N - 1], 1) + " " + m.unit + " away from</mark> " + n + " nearby stations over " + (N - Math.max(0, rv.nbOnset)) + " minutes. They stayed steady.", plain: "" };
+    }
+    if (o.status === "event") return { html: "Not a fault: <mark>temperature, pressure and humidity all changed together</mark>, and " + n + " nearby stations saw the same storm. Real weather is kept, not deleted.", plain: "" };
+    return { html: "All clear: <mark>temperature, pressure and humidity agree</mark> with each other and with " + n + " nearby stations.", plain: "" };
+  }
+
+  function headline(s, R) {
+    var o = R.out;
+    if (o.status === "fault") {
+      var m = META[o.prim];
+      if (o.type === "stuck") return "Readings frozen — sensor fault";
+      if (o.type === "spike") return "Sudden " + m.name.toLowerCase() + " spike — sensor fault";
+      return m.name + " slowly drifting — needs calibration";
+    }
+    if (o.status === "event") return "Storm seen by neighbours too — real weather";
+    return "All checks passed";
+  }
+
+  var ST = {}, sel = STATIONS[0].id, flashId = null;
+  function run(s) { ST[s.id] = analyze(s); }
+  STATIONS.forEach(run);
+  var $ = function (id) { return document.getElementById(id); };
+  var ORDER = { high: 0, medium: 1, event: 2, ok: 3 };
+  function key(s) { var o = ST[s.id].out; return o.status === "event" ? "event" : o.sev; }
+
+  function renderQueue() {
+    var list = STATIONS.slice().sort(function (a, b) { return ORDER[key(a)] - ORDER[key(b)] || (a.id < b.id ? -1 : 1); });
+    $("queue").innerHTML = list.map(function (s) {
+      var k = key(s), lbl = { high: "High", medium: "Medium", event: "Real weather", ok: "OK" }[k];
+      return '<button class="st ' + k + (k === "ok" ? " compact" : "") + (flashId === s.id ? " flash" : "") + '" data-id="' + s.id + '" aria-pressed="' + (s.id === sel) + '"><span class="bar"></span><span><span class="id">' + s.id + '</span><div class="msg">' + headline(s, ST[s.id]) + '</div></span><span class="pill ' + k + '">' + lbl + '</span></button>';
+    }).join("");
+    var c = { high: 0, medium: 0, event: 0, ok: 0 }; STATIONS.forEach(function (s) { c[key(s)]++; });
+    $("qcount").textContent = (c.high + c.medium) + " open";
+    $("kpis").innerHTML = '<div class="kpi"><b>1,008</b><span>stations watched</span></div><div class="kpi high"><b>' + (c.high + c.medium) + '</b><span>sensor faults open</span></div><div class="kpi real"><b>' + c.event + '</b><span>real weather events</span></div><div class="kpi ok"><b>' + c.ok + '</b><span>healthy in this view</span></div>';
+  }
+
+  var IN = { x0: 48, x1: 586, y0: 10, y1: 140, W: 640, H: 168 };
+  function chart(s, R, v) {
+    var m = META[v], S = R.d.S[v], lo = R.nbLo[v], hi = R.nbHi[v], md = R.nbMed[v], o = R.v[v], out = R.out;
+    var vals = S.concat(lo, hi), mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals), pad = (mx - mn) * 0.1 || 1; mn -= pad; mx += pad;
+    var X = function (i) { return IN.x0 + (IN.x1 - IN.x0) * i / (N - 1); }, Y = function (q) { return IN.y1 - (IN.y1 - IN.y0) * (q - mn) / (mx - mn); };
+    var g = "";
+    var ticks = 4; for (var t = 0; t <= ticks; t++) { var q = mn + (mx - mn) * t / ticks, y = Y(q); g += '<line x1="' + IN.x0 + '" x2="' + IN.x1 + '" y1="' + y + '" y2="' + y + '" stroke="var(--grid)" stroke-width="1"/><text x="' + (IN.x0 - 6) + '" y="' + (y + 3) + '" text-anchor="end">' + q.toFixed(m.d) + '</text>'; }
+    [0, 30, 60, 90, 119].forEach(function (i) { g += '<text x="' + X(i) + '" y="' + (IN.H - 5) + '" text-anchor="' + (i === 0 ? "start" : i === 119 ? "end" : "middle") + '">' + clock(i) + '</text>'; });
+    var flagged = out.status === "fault" && out.vars.indexOf(v) >= 0, tone = flagged ? (out.sev === "medium" ? "var(--med)" : "var(--high)") : "var(--real)";
+    var band = "";
+    if (flagged || (out.status === "event")) { var from = flagged ? out.onsetIdx : out.onsetIdx; band = '<rect x="' + X(from) + '" y="' + IN.y0 + '" width="' + (IN.x1 - X(from)) + '" height="' + (IN.y1 - IN.y0) + '" fill="' + tone + '" opacity=".12"/><line x1="' + X(from) + '" x2="' + X(from) + '" y1="' + IN.y0 + '" y2="' + IN.y1 + '" stroke="' + tone + '" stroke-width="1" stroke-dasharray="3 3"/><text x="' + (X(from) + 5) + '" y="' + (IN.y0 + 9) + '" style="fill:' + tone + '">' + (flagged ? "fault begins " : "storm arrives ") + clock(from) + '</text>'; }
+    var area = "M" + hi.map(function (q, i) { return X(i).toFixed(1) + "," + Y(q).toFixed(1); }).join("L") + "L" + lo.map(function (q, i) { return X(N - 1 - i).toFixed(1) + "," + Y(lo[N - 1 - i]).toFixed(1); }).join("L") + "Z";
+    var line = function (a) { return "M" + a.map(function (q, i) { return X(i).toFixed(1) + "," + Y(q).toFixed(1); }).join("L"); };
+    var endX = X(N - 1), endY = Y(S[N - 1]);
+    var dotc = flagged ? tone : "var(--accent)";
+    var svg = '<svg viewBox="0 0 ' + IN.W + ' ' + IN.H + '" role="img" aria-label="' + m.name + ' over the last two hours">' + g + band + '<path d="' + area + '" fill="var(--muted)" opacity=".2"/><path d="' + line(md) + '" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 3"/><path d="' + line(S) + '" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/><circle cx="' + endX + '" cy="' + endY + '" r="5" fill="' + dotc + '" stroke="var(--panel)" stroke-width="2"/></svg>';
+    var dev = o.dev[N - 1], cls = flagged ? (out.sev === "medium" ? "warn" : "bad") : "";
+    var devTxt = flagged ? sg(dev, m.d) + " " + m.unit + " vs nearby" : (out.status === "event" ? "moves with nearby stations" : "agrees with nearby stations");
+    return '<div class="chart"><div class="cmeta"><div class="name">' + m.name + '</div><div class="val">' + f(S[N - 1], m.d) + ' <small>' + m.unit + '</small></div><div class="dev ' + cls + '">' + devTxt + '</div></div>' + svg + '</div>';
+  }
+
+  function checkRow(state, title, tag, text) { return '<div class="check ' + state + '"><span class="ic">' + ({ pass: "✓", fail: "!", warn: "~", na: "–" }[state] || "✓") + '</span><div><h3>' + title + '<span>' + tag + '</span></h3><p>' + text + '</p></div></div>'; }
+
+  function renderDetail() {
+    var s = STATIONS.filter(function (q) { return q.id === sel; })[0], R = ST[sel], o = R.out, S = R.d.S, k = key(s);
+    var lbl = { high: "High", medium: "Medium", event: "Real weather", ok: "OK" }[k];
+    var maxkm = Math.max.apply(null, s.sats.map(function (q) { return q.km; }));
+    $("head").innerHTML = '<div><h2>' + s.id + '</h2><div class="sub">' + s.city + ' · ' + s.lat.toFixed(2) + '°N ' + s.lon.toFixed(2) + '°E · ' + s.sats.length + ' nearby stations within ' + Math.ceil(maxkm) + ' km</div></div><div class="right"><span class="conf">' + (o.status === "fault" ? 'Fault confidence <b>' + Math.round(o.conf * 100) + '%</b>' : o.status === "event" ? 'Real-weather confidence <b>' + Math.round(o.conf * 100) + '%</b>' : 'Confidence <b>high</b>') + '</span><span class="pill ' + k + '" style="font-size:12px;padding:4px 12px">' + lbl + '</span></div>';
+    var demo = [["spike", "Sudden spike"], ["stuck", "Stuck value"], ["drift", "Slow drift"], ["storm", "Real storm"], [null, "Clear"]];
+    $("demo").innerHTML = '<span>Live demo · inject into this station</span>' + demo.map(function (d) { return '<button class="seg' + (s.scn === d[0] ? " on" : "") + '" data-scn="' + d[0] + '">' + d[1] + '</button>'; }).join("");
+    $("charts").innerHTML = VARS.map(function (v) { return chart(s, R, v); }).join("");
+
+    // why
+    $("quote").innerHTML = sentence(s, R).html;
+    $("whytime").textContent = o.status === "fault" ? "raised " + clock(o.detectIdx) + " IST" : o.status === "event" ? "seen " + clock(o.detectIdx) + " IST" : "updated " + clock(N - 1) + " IST";
+    var p = o.status === "fault" ? o.conf : o.status === "event" ? 1 - o.conf : 0.03;
+    $("mark").style.left = (p * 100).toFixed(0) + "%"; $("mval").textContent = Math.round(p * 100) + "% fault";
+
+    var C = "", faultV = o.status === "fault" ? o.vars : [];
+    var qcMsg = [], qcBad = false;
+    VARS.forEach(function (v) { var q = R.v[v], m = META[v];
+      if (q.qcRangeNow) { qcBad = true; qcMsg.push(m.name + " " + f(S[v][N - 1], m.d) + " " + m.unit + " is outside the " + m.lo + " to " + m.hi + " limit."); }
+      else if (q.qcStuckNow) { qcBad = true; qcMsg.push(m.name + " identical for " + (N - q.qc.stuck + 19) + " readings in a row."); }
+      else if (q.qcStepRecent) { qcBad = true; qcMsg.push(m.name + " changed " + f(Math.abs(S[v][q.qc.step] - S[v][q.qc.step - 1]), 1) + " " + m.unit + " in 1 minute."); } });
+    C += checkRow(qcBad ? "fail" : "pass", "1 · Quick check on the station", "range · jump · stuck", qcBad ? qcMsg.join(" ") : "No impossible values, sudden jumps or stuck readings.");
+    C += checkRow(R.physActive ? "fail" : "pass", "2 · Physics check", "T ↔ RH dew point", R.physActive ? "Temperature and humidity together imply a dew point of " + f(R.tdNow, 1) + " °C, up from " + f(R.tdBase, 1) + " °C. Air moisture cannot change that fast." : "Temperature, pressure and humidity agree. Dew point steady near " + f(R.tdNow, 1) + " °C.");
+    var nbBad = VARS.filter(function (v) { return R.v[v].nbActive; });
+    var nbTxt;
+    if (nbBad.length) nbTxt = nbBad.map(function (v) { return META[v].name + " is " + sg(R.v[v].dev[N - 1], META[v].d) + " " + META[v].unit + " from"; }).join(", ") + " " + s.sats.length + " stations within " + Math.ceil(maxkm) + " km. Only this station is off.";
+    else if (o.status === "event") nbTxt = "All " + s.sats.length + " stations within " + Math.ceil(maxkm) + " km moved the same way. That is weather, not a sensor.";
+    else nbTxt = "Within normal spread of " + s.sats.length + " stations within " + Math.ceil(maxkm) + " km.";
+    C += checkRow(nbBad.length ? "fail" : (o.status === "event" ? "warn" : "pass"), "3 · Neighbour check", "buddy · 100 km", nbTxt);
+    C += checkRow(R.aiOn ? (o.status === "fault" ? "fail" : "warn") : "pass", "4 · AI check", "autoencoder · simulated", "Anomaly score " + R.aiScore.toFixed(2) + " against this station’s own normal pattern." + (R.aiOn && o.status === "event" ? " High, but neighbours explain it." : ""));
+    $("checks").innerHTML = C;
+
+    // drivers
+    var zmax = Math.max.apply(null, VARS.map(function (v) { return Math.abs(R.v[v].z[N - 1]); }));
+    var raw = [["Difference from neighbours", Math.min(1, zmax / 12) * (o.status === "fault" ? 1 : 0.15)], ["Dew-point jump (physics)", Math.min(1, Math.abs(R.tdNow - R.tdBase) / 12) * (R.physActive ? 1 : 0.1)], ["Broke a station limit", qcBad ? 0.6 : 0.03], ["Unusual for this station (AI)", R.aiScore * (o.status === "fault" ? 0.5 : 0.35)]];
+    var tot = raw.reduce(function (a, b) { return a + b[1]; }, 0);
+    $("drivers").innerHTML = raw.map(function (r) { var pc = Math.round(100 * r[1] / tot); return '<div class="drv"><span>' + r[0] + '</span><div class="b"><i style="width:' + pc + '%"></i></div><em>' + pc + '%</em></div>'; }).join("");
+
+    // ticket
+    var T = "", tno = "";
+    if (o.status === "fault") {
+      var m = META[o.prim], both = o.vars.indexOf("T") >= 0 && o.vars.indexOf("RH") >= 0 && o.type === "stuck";
+      var sensor = both ? "Temperature / humidity probe" : m.sensor, type = { spike: "Sudden spike", stuck: "Stuck reading", drift: "Slow drift" }[o.type];
+      var lag = o.detectIdx - o.onsetIdx;
+      var reason = o.type === "spike" ? "Value jumped; humidity did not follow; neighbours normal." : o.type === "stuck" ? "Identical readings while neighbours kept changing." : "Slowly moving away from neighbours; they stayed steady.";
+      var corr = o.corr.map(function (c) { return ({T:"Temp",P:"Pressure",RH:"Humidity"})[c.v] + " " + f(c.was, META[c.v].d) + '<span class="arrow">→</span><span class="good">' + f(c.now, META[c.v].d) + " " + META[c.v].unit + "</span>"; });
+      var recal = o.type === "spike" ? "Inspect probe within 48 hours" : o.type === "stuck" ? "Check wiring and probe within 24 hours" : "Recalibrate within 7 days";
+      tno = "TKT-" + (hash(s.id + o.type) % 9000 + 1000) + " · raised " + clock(o.detectIdx) + " · " + (lag <= 3 ? "within " + Math.max(lag, 1) + " min of the fault" : lag + " min after the fault began");
+      T = '<div><dt>Faulty sensor</dt><dd class="big">' + sensor + '</dd></div><div><dt>Type of fault</dt><dd>' + type + '</dd></div><div><dt>Reason</dt><dd>' + reason + '</dd></div><div><dt>Corrected value</dt><dd class="big" style="font-size:13px">' + corr.join("<br>") + '</dd></div><div><dt>Recalibrate</dt><dd>' + recal + '</dd></div>';
+    } else {
+      tno = "No ticket needed";
+      T = '<div style="grid-column:1/-1"><dt>Status</dt><dd>' + (o.status === "event" ? "Readings are kept and marked as a real weather event. Forecasters and warning teams can use them." : "No repair needed. Readings are passing every check.") + '</dd></div>';
+    }
+    $("ticket").innerHTML = T; $("tkno").textContent = tno;
+  }
+
+  // map
+  var POLY = [[74.4,37.0],[75.9,36.6],[77.8,35.5],[78.9,34.3],[78.4,32.6],[79.5,32.0],[78.8,30.6],[80.1,30.1],[80.9,29.9],[81.0,29.0],[80.1,28.8],[81.9,27.8],[84.1,27.4],[85.7,26.6],[87.3,26.4],[88.1,26.5],[88.2,27.9],[88.9,27.3],[89.7,26.7],[91.5,26.8],[92.1,26.9],[93.5,27.3],[95.2,27.9],[96.1,29.3],[97.3,28.2],[96.9,27.2],[96.0,26.2],[95.2,26.0],[94.6,24.6],[93.4,23.0],[92.6,22.0],[92.3,23.5],[91.7,24.2],[91.1,23.7],[91.2,25.2],[89.9,25.3],[89.0,25.3],[88.5,24.2],[88.7,23.2],[89.0,22.0],[88.0,21.7],[87.0,21.4],[86.9,20.3],[85.8,19.8],[84.8,19.3],[83.3,17.8],[82.3,16.6],[81.3,15.8],[80.3,15.5],[80.2,13.5],[80.3,12.5],[79.8,11.3],[79.4,10.3],[78.4,9.2],[77.5,8.1],[76.6,8.9],[75.8,11.2],[74.8,12.9],[74.1,14.9],[73.4,16.6],[72.8,18.6],[72.8,20.4],[72.6,21.5],[72.2,21.1],[70.8,20.7],[69.2,22.0],[70.2,22.9],[68.8,23.2],[68.2,23.7],[70.0,24.2],[70.9,24.4],[70.1,25.7],[70.2,27.5],[71.9,27.9],[72.9,29.3],[74.2,30.6],[74.6,31.8],[74.0,32.9],[74.4,34.0],[73.8,34.6]];
+  var MW = 340, MS = MW / 31, MH = Math.round(31.5 * MS);
+  var mx = function (lon) { return ((lon - 67) * MS).toFixed(1); }, my = function (lat) { return ((37.8 - lat) * MS).toFixed(1); };
+  var kcolor = { high: "var(--high)", medium: "var(--med)", event: "var(--real)", ok: "var(--ok)" };
+  function renderMap() {
+    var g = "", d;
+    for (d = 70; d <= 95; d += 5) g += '<line x1="' + mx(d) + '" x2="' + mx(d) + '" y1="0" y2="' + MH + '" stroke="var(--grid)"/>';
+    for (d = 10; d <= 35; d += 5) g += '<line y1="' + my(d) + '" y2="' + my(d) + '" x1="0" x2="' + MW + '" stroke="var(--grid)"/>';
+    var poly = POLY.map(function (p) { return mx(p[0]) + "," + my(p[1]); }).join(" ");
+    var sats = "", nodes = "", selS = STATIONS.filter(function (q) { return q.id === sel; })[0];
+    STATIONS.forEach(function (s) { s.sats.forEach(function (n) { sats += '<circle cx="' + mx(n.lon) + '" cy="' + my(n.lat) + '" r="1.7" fill="var(--faint)"/>'; }); });
+    var ring = '<circle cx="' + mx(selS.lon) + '" cy="' + my(selS.lat) + '" r="' + (100 / 111 * MS).toFixed(1) + '" fill="color-mix(in srgb, var(--accent) 10%, transparent)" stroke="var(--accent)" stroke-dasharray="3 2"/>' + selS.sats.map(function (n) { return '<line x1="' + mx(selS.lon) + '" y1="' + my(selS.lat) + '" x2="' + mx(n.lon) + '" y2="' + my(n.lat) + '" stroke="var(--accent)" stroke-width=".8"/>'; }).join("");
+    STATIONS.forEach(function (s) {
+      var k = key(s), c = kcolor[k], x = mx(s.lon), y = my(s.lat);
+      nodes += '<g class="node" data-id="' + s.id + '" tabindex="0" role="button" aria-label="' + s.id + '">' + (k === "high" ? '<circle cx="' + x + '" cy="' + y + '" r="9" fill="' + c + '" opacity=".22"/>' : "") + '<circle cx="' + x + '" cy="' + y + '" r="' + (s.id === sel ? 5.5 : 4.2) + '" fill="' + c + '" stroke="' + (s.id === sel ? "var(--fg)" : "var(--panel)") + '" stroke-width="1.5"/><text x="' + (+x + s.lx) + '" y="' + (+y + s.ly) + '" style="' + (s.id === sel ? "fill:var(--fg)" : "") + '">' + s.code + '</text></g>';
+    });
+    $("map").innerHTML = '<svg class="map" viewBox="0 0 ' + MW + ' ' + MH + '" role="img" aria-label="Map of India with sample stations">' + g + '<polygon points="' + poly + '" fill="var(--land)" stroke="var(--faint)" stroke-width="1" stroke-linejoin="round"/>' + ring + sats + nodes + '</svg>';
+  }
+
+  function renderAll() { renderQueue(); renderDetail(); renderMap(); }
+  function select(id) { sel = id; flashId = null; renderAll(); }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-id]"); if (b) { select(b.getAttribute("data-id")); return; }
+    var sc = e.target.closest("[data-scn]");
+    if (sc) { var v = sc.getAttribute("data-scn"), s = STATIONS.filter(function (q) { return q.id === sel; })[0]; s.scn = v === "null" ? null : v; run(s); flashId = ST[s.id].out.status === "fault" ? s.id : null; renderAll(); }
+  });
+  document.addEventListener("keydown", function (e) { if ((e.key === "Enter" || e.key === " ") && e.target.classList && e.target.classList.contains("node")) { e.preventDefault(); select(e.target.getAttribute("data-id")); } });
+  renderAll();
+})();
+</script>

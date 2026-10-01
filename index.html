@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>TRINETRA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: single long landing site, 1120px column, sticky nav, sections alternate open ground and panels. Links to dashboard.html for the live UI. Dark-first, same tokens as the dashboard. */
+:root {
+  --bg: #0a1216; --panel: #101c22; --panel2: #15252d; --line: #22363f;
+  --fg: #e6f0f2; --muted: #8ba3ab; --faint: #5c757e;
+  --accent: #4fd8c4; --accent-ink: #04231f;
+  --high: #ff6060; --med: #f5a524; --ok: #4ecb8a; --real: #7aa8ff;
+  --display: "Schibsted Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #edf2f4; --panel: #ffffff; --panel2: #f2f6f7; --line: #d3dfe3;
+    --fg: #0d1f26; --muted: #55707b; --faint: #7f939b;
+    --accent: #0a8f80; --accent-ink: #ffffff;
+    --high: #d42e2e; --med: #a8640a; --ok: #1b8a52; --real: #2f62d0;
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #edf2f4; --panel: #ffffff; --panel2: #f2f6f7; --line: #d3dfe3;
+  --fg: #0d1f26; --muted: #55707b; --faint: #7f939b;
+  --accent: #0a8f80; --accent-ink: #ffffff;
+  --high: #d42e2e; --med: #a8640a; --ok: #1b8a52; --real: #2f62d0;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+body { background: var(--bg); color: var(--fg); font-family: var(--display); font-size: 16px; line-height: 1.6; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.w { max-width: 1120px; margin-inline: auto; padding-inline: 20px; }
+section { padding-block: 72px; }
+.eyebrow { font: 600 11.5px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin: 0 0 14px; }
+h2 { font-size: clamp(28px, 4vw, 42px); line-height: 1.12; letter-spacing: -.02em; font-weight: 800; margin: 0 0 16px; text-wrap: balance; max-width: 22ch; }
+h3 { font-size: 18px; margin: 0 0 6px; font-weight: 700; }
+.lead { font-size: 18px; color: var(--muted); max-width: 62ch; margin: 0; }
+p { margin: 0; }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 8px; font-weight: 700; text-decoration: none; border: 1px solid var(--line); background: var(--panel); }
+.btn.pri { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn:hover { border-color: var(--accent); }
+
+/* nav */
+nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+nav .w { display: flex; align-items: center; gap: 24px; height: 56px; }
+.logo { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: .2em; text-decoration: none; font-size: 15px; }
+nav ul { display: flex; gap: 20px; list-style: none; margin: 0 0 0 auto; padding: 0; overflow-x: auto; scrollbar-width: none; }
+nav ul a { color: var(--muted); text-decoration: none; font-size: 13.5px; white-space: nowrap; }
+nav ul a:hover { color: var(--fg); }
+nav .btn { padding: 7px 14px; font-size: 13px; white-space: nowrap; }
+
+/* hero */
+.hero { padding-block: 64px 56px; }
+.hero-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 48px; align-items: center; }
+.hero h1 { font-size: clamp(40px, 7.4vw, 76px); line-height: .95; letter-spacing: .12em; font-weight: 800; margin: 0 0 20px; }
+.hero .full { font: 500 13px var(--mono); letter-spacing: .04em; color: var(--muted); margin-bottom: 22px; max-width: 52ch; }
+.hero .full b { color: var(--accent); font-weight: 600; }
+.hero .tag { font-size: clamp(20px, 2.6vw, 26px); font-weight: 600; line-height: 1.3; max-width: 26ch; margin-bottom: 14px; text-wrap: balance; }
+.hero .sub { color: var(--muted); max-width: 52ch; margin-bottom: 28px; }
+.ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+.meta { display: flex; gap: 8px 22px; flex-wrap: wrap; margin-top: 30px; font: 500 11.5px var(--mono); color: var(--faint); letter-spacing: .04em; }
+.meta b { color: var(--muted); font-weight: 500; }
+.probe { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+.probe-h { display: flex; justify-content: space-between; font: 600 10.5px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.probe-h i { font-style: normal; color: var(--ok); }
+.reading { display: grid; grid-template-columns: 110px minmax(0, 1fr); align-items: center; gap: 14px; background: var(--panel2); border-radius: 10px; padding: 12px 14px; }
+.reading small { display: block; font: 600 10.5px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.reading b { font: 600 30px/1.1 var(--mono); }
+.reading b span { font-size: 13px; color: var(--muted); font-weight: 500; margin-left: 4px; }
+.reading svg { width: 100%; height: 44px; display: block; }
+.probe-f { font-size: 13px; color: var(--muted); }
+
+/* problem */
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 36px; }
+.stat { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px; }
+.stat b { display: block; font: 700 clamp(28px, 3.4vw, 38px)/1.1 var(--mono); letter-spacing: -.02em; }
+.stat span { color: var(--muted); font-size: 14px; }
+.callout { margin-top: 20px; background: color-mix(in srgb, var(--high) 9%, var(--panel)); border: 1px solid color-mix(in srgb, var(--high) 40%, var(--line)); border-radius: 12px; padding: 20px 22px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 18px; align-items: center; }
+.callout b { font: 700 40px/1 var(--mono); color: var(--high); }
+.callout p { color: var(--fg); }
+
+/* how it works */
+.steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 36px; counter-reset: s; }
+.step { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px; position: relative; }
+.step::before { counter-increment: s; content: counter(s); font: 600 12px var(--mono); color: var(--accent-ink); background: var(--accent); width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; margin-bottom: 14px; }
+.step p { color: var(--muted); font-size: 15px; }
+
+/* demo */
+.demo { margin-top: 36px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
+.tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.tab { font: inherit; cursor: pointer; color: inherit; background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 9px 16px; font-weight: 600; }
+.tab[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.demo-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 24px; align-items: center; }
+.demo svg { width: 100%; height: auto; display: block; }
+.demo svg text { font: 400 12px var(--mono); fill: var(--faint); }
+.verdict { display: flex; flex-direction: column; gap: 10px; }
+.vrow { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 10px; align-items: start; padding: 10px 12px; background: var(--panel2); border-radius: 8px; font-size: 14px; }
+.vrow i { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font: 700 12px var(--mono); font-style: normal; color: var(--bg); background: var(--ok); }
+.vrow.bad i { background: var(--high); }
+.vrow b { display: block; font-size: 14px; }
+.vrow span { color: var(--muted); }
+.result { padding: 12px 14px; border-radius: 8px; font-weight: 700; border: 1px solid currentColor; }
+.result.real { color: var(--real); background: color-mix(in srgb, var(--real) 12%, transparent); }
+.result.fault { color: var(--high); background: color-mix(in srgb, var(--high) 12%, transparent); }
+.result small { display: block; font-weight: 400; color: var(--fg); font-size: 14px; margin-top: 2px; }
+
+/* innovation */
+.cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 36px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 22px; }
+.card p { color: var(--muted); }
+.card q { display: block; margin-top: 12px; font: 400 13px/1.5 var(--mono); color: var(--accent); quotes: none; border-left: 2px solid var(--accent); padding-left: 12px; }
+
+/* tech */
+.stack { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 36px; }
+.stack div { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px; }
+.stack h3 { font: 600 11px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.stack ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; font-size: 15px; }
+.stack li { font-weight: 600; }
+.alert-note { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; margin-top: 12px; }
+.bars { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 22px; }
+.bar { margin-top: 14px; }
+.bar div { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 6px; }
+.bar div b { font-family: var(--mono); }
+.bar i { display: block; height: 12px; border-radius: 6px; background: var(--muted); opacity: .5; }
+.bar.a i { background: var(--accent); opacity: 1; }
+.bars small { display: block; color: var(--faint); margin-top: 14px; font-size: 12.5px; }
+.plan { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 22px; }
+.plan ol { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.plan li { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 12px; font-size: 15px; }
+.plan li b { font: 600 12px var(--mono); color: var(--accent); padding-top: 3px; }
+
+/* feasibility table */
+.tbl { margin-top: 36px; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--panel); }
+.tr { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); }
+.tr > div { padding: 16px 20px; border-top: 1px solid var(--line); }
+.tr:first-child > div { border-top: 0; font: 600 11px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); background: var(--panel2); }
+.tr > div:first-child { font-weight: 600; border-right: 1px solid var(--line); }
+.tr > div:last-child { color: var(--muted); }
+
+/* impact */
+.split { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 36px; }
+.ben { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px; }
+.ben small { font: 600 10.5px var(--mono); letter-spacing: .12em; color: var(--accent); }
+.ben h3 { margin-top: 6px; }
+.ben p { color: var(--muted); font-size: 15px; }
+.goal { margin-top: 36px; font-size: clamp(22px, 3vw, 32px); line-height: 1.25; font-weight: 700; max-width: 30ch; letter-spacing: -.01em; text-wrap: balance; }
+.goal em { font-style: normal; color: var(--accent); }
+
+/* refs */
+.refs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 36px; }
+.ref { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px; }
+.ref h3 { font: 600 11px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.ref ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 14.5px; display: flex; flex-direction: column; gap: 6px; }
+.ref li b { color: var(--fg); font-weight: 600; }
+
+/* engine, results, code */
+.layers { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-top: 36px; }
+.layer { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px; }
+.layer small { font: 600 10.5px var(--mono); letter-spacing: .12em; color: var(--accent); }
+.layer h3 { margin-top: 6px; font-size: 16px; }
+.layer p { color: var(--muted); font-size: 14px; }
+.outs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+.outs .card p { font-size: 14.5px; }
+.rtable { margin-top: 36px; border: 1px solid var(--line); border-radius: 12px; overflow-x: auto; background: var(--panel); }
+.rtable table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 14.5px; }
+.rtable th, .rtable td { padding: 13px 16px; text-align: right; border-top: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.rtable th:first-child, .rtable td:first-child { text-align: left; }
+.rtable thead th { border-top: 0; font: 600 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); background: var(--panel2); }
+.rtable tr.hl td { background: color-mix(in srgb, var(--accent) 10%, transparent); font-weight: 700; }
+.rtable td b { color: var(--accent); }
+.note { color: var(--faint); font-size: 13px; margin-top: 14px; max-width: 78ch; }
+pre.code { margin: 28px 0 0; padding: 20px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow-x: auto; font: 500 13.5px/1.7 var(--mono); color: var(--fg); }
+pre.code i { color: var(--faint); font-style: normal; }
+.demo-grid .chartbox svg text { font: 400 12px var(--mono); fill: var(--faint); }
+/* cta + footer */
+.cta { text-align: left; }
+.cta-box { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: clamp(24px, 5vw, 48px); display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; }
+footer { border-top: 1px solid var(--line); padding-block: 32px; color: var(--faint); font-size: 13px; }
+footer .w { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+
+@media (max-width: 900px) {
+  .hero-grid, .demo-grid, .alert-note { grid-template-columns: minmax(0, 1fr); }
+  .stats, .stack, .split, .outs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .layers { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  nav ul { display: none; }
+  nav .btn { margin-left: auto; }
+}
+@media (max-width: 560px) {
+  section { padding-block: 52px; }
+  .stats, .stack, .split, .steps, .cards, .refs, .outs, .layers { grid-template-columns: minmax(0, 1fr); }
+  .tr { grid-template-columns: minmax(0, 1fr); }
+  .tr > div:first-child { border-right: 0; padding-bottom: 4px; }
+  .tr > div:last-child { border-top: 0; padding-top: 0; }
+  .tr:first-child > div:last-child { display: none; }
+  .callout { grid-template-columns: minmax(0, 1fr); }
+  .reading { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+
+</head><body>
+<nav>
+  <div class="w">
+    <a class="logo" href="#top"><svg width="28" height="28" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" fill="none" stroke="var(--accent)" stroke-width="2"/><circle cx="20" cy="11" r="3.4" fill="var(--accent)"/><circle cx="11.5" cy="25.5" r="3.4" fill="var(--accent)"/><circle cx="28.5" cy="25.5" r="3.4" fill="var(--accent)"/><path d="M20 11 11.5 25.5h17Z" fill="none" stroke="var(--accent)" stroke-width="1" opacity=".55"/></svg>TRINETRA</a>
+    <ul>
+      <li><a href="#problem">Problem</a></li><li><a href="#how">How it works</a></li><li><a href="#demo">Real or broken?</a></li><li><a href="#engine">Engine</a></li><li><a href="#results">Results</a></li><li><a href="usecases.html">Use cases</a></li><li><a href="#run">Run it</a></li>
+    </ul>
+    <a class="btn pri" href="dashboard.html">Open dashboard</a>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="w hero-grid">
+    <div>
+      <p class="eyebrow">Smart India Hackathon 2026 · SIH26073</p>
+      <h1>TRINETRA</h1>
+      <p class="full"><b>T</b>ri-parameter <b>R</b>eal-time <b>I</b>ntelligent <b>NE</b>twork for <b>T</b>rustworthy <b>R</b>eliable <b>A</b>tmospheric data</p>
+      <p class="tag">AI and physics that spot faulty weather-station sensors.</p>
+      <p class="sub">It tells a real extreme weather event apart from a broken sensor, and explains every alert in plain words.</p>
+      <div class="ctas"><a class="btn pri" href="dashboard.html">Open the live dashboard</a><a class="btn" href="#how">See how it works</a></div>
+      <div class="meta"><span><b>Theme</b> Disaster Management</span><span><b>Organisation</b> IMD, Ministry of Earth Sciences</span><span><b>Team</b> Secure OOPS · 126173</span></div>
+    </div>
+    <div class="probe" aria-label="The three readings each station sends">
+      <div class="probe-h"><span>One station · every minute</span><i id="pt">●&nbsp;live</i></div>
+      <div class="reading"><div><small>Temperature</small><b id="vT">31.4<span>°C</span></b></div><svg viewBox="0 0 200 44" preserveAspectRatio="none"><path id="lT" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/></svg></div>
+      <div class="reading"><div><small>Pressure</small><b id="vP">1008.2<span>hPa</span></b></div><svg viewBox="0 0 200 44" preserveAspectRatio="none"><path id="lP" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/></svg></div>
+      <div class="reading"><div><small>Humidity</small><b id="vR">62<span>%</span></b></div><svg viewBox="0 0 200 44" preserveAspectRatio="none"><path id="lR" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/></svg></div>
+      <p class="probe-f">Each station sends only these three readings. Physics links them to each other, and nearby stations should agree. TRINETRA uses both to catch broken sensors.</p>
+    </div>
+  </div>
+</header>
+
+<section id="problem">
+  <div class="w">
+    <p class="eyebrow">The problem</p>
+    <h2>A broken sensor sends wrong data, and nobody notices.</h2>
+    <p class="lead">That data slips into forecasts and disaster warnings. Flood, cloudburst and heatwave alerts are only as good as the readings behind them.</p>
+    <div class="stats">
+      <div class="stat"><b>1,008</b><span>IMD automatic weather stations</span></div>
+      <div class="stat"><b>1,382</b><span>automatic rain gauges</span></div>
+      <div class="stat"><b>+200</b><span>new city stations in 2026 (Mission Mausam)</span></div>
+      <div class="stat"><b>~50%</b><span>of sensor faults missed by simple rule-based checks</span></div>
+    </div>
+    <div class="callout"><b>20</b><p>In Haryana, 20 IMD weather stations stopped sending usable data for months before anyone noticed. More stations without automatic checking just means more bad data on the map.</p></div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="w">
+    <p class="eyebrow">Proposed solution</p>
+    <h2>Six steps from a raw reading to a repair ticket.</h2>
+    <p class="lead">Physics handles the easy cases first, so the AI only has to learn the rest. That keeps false alarms low.</p>
+    <div class="steps">
+      <div class="step"><h3>Collect</h3><p>The station sends temperature, pressure and humidity every minute.</p></div>
+      <div class="step"><h3>Quick check</h3><p>The station itself blocks impossible values: out of range, sudden jumps and stuck readings.</p></div>
+      <div class="step"><h3>Physics check</h3><p>Do T, P and RH agree with each other and with nearby stations? No training needed.</p></div>
+      <div class="step"><h3>AI check</h3><p>AI learns each station’s normal pattern to spot sudden spikes and slow drift.</p></div>
+      <div class="step"><h3>Decide</h3><p>Real weather hits neighbours too. A broken sensor is alone. That is the test.</p></div>
+      <div class="step"><h3>Alert</h3><p>A repair ticket says which sensor, what is wrong, why, and gives a corrected value.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="demo">
+  <div class="w">
+    <p class="eyebrow">Two independent checks</p>
+    <h2>Is it a real heatwave or a broken sensor?</h2>
+    <p class="lead">Same station, same hour, two different causes. The bright line is the station, the dashed line is what its neighbours within 100 km say it should read. Both cases are scored by the working engine.</p>
+    <div class="demo">
+      <div class="tabs" role="group" aria-label="Scenario">
+        <button class="tab" id="tabH" aria-pressed="true">Heatwave</button>
+        <button class="tab" id="tabF" aria-pressed="false">Broken sensor (55 °C)</button>
+      </div>
+      <div class="demo-grid">
+        <div class="chartbox" id="dchart"></div>
+        <div class="verdict" id="dverdict"></div>
+      </div>
+    <div class="cards" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+      <div class="card"><h3>Check 1 · Physics</h3><p>T, P and RH are linked. If temperature jumps but humidity does not change to match, the sensor moved, not the air.</p></div>
+      <div class="card"><h3>Check 2 · Neighbours</h3><p>Stations within 100 km usually agree. If only one station goes strange, it is that station’s sensor.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="innovation">
+  <div class="w">
+    <p class="eyebrow">What is new</p>
+    <h2>Four ideas that set it apart.</h2>
+    <div class="cards">
+      <div class="card"><h3>Physics first, AI second</h3><p>Physics handles the easy cases, so the AI learns only the rest. Fewer false alarms.</p></div>
+      <div class="card"><h3>Every alert is explained</h3><p>Maintenance teams see the reason, not just a score.</p><q>Flagged: humidity reading jumped while 4 nearby stations stayed normal.</q></div>
+      <div class="card"><h3>Real extremes are not deleted</h3><p>Two independent checks separate a real heatwave from a failing sensor. Data is flagged with a confidence score, never removed.</p></div>
+      <div class="card"><h3>Works on the station itself</h3><p>A tiny AI model, under 100 KB, runs on a low-cost chip and flags bad data before it is sent.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="tech">
+  <div class="w">
+    <p class="eyebrow">Technical approach</p>
+    <h2>Open-source tools, from the station to the screen.</h2>
+    <p class="lead">The prototype uses the tools marked built. The rest of the original plan (TensorFlow Lite Micro, Kafka, FastAPI, TimescaleDB, React) is the production path and does not change the method.</p>
+    <div class="stack">
+      <div><h3>On the station</h3><ul><li>ESP32-S3 + BME280</li><li>C++ edge checks (built, 112 bytes)</li><li>Planned: TFLite Micro model</li></ul></div>
+      <div><h3>Physics + AI engine</h3><ul><li>scikit-learn IsolationForest</li><li>Neural autoencoder (MLP)</li><li>Gradient-boosted fusion</li></ul></div>
+      <div><h3>Data pipeline</h3><ul><li>Python batch + stream monitor</li><li>CSV loader for IMD archives</li><li>Planned: Kafka, FastAPI, TimescaleDB</li></ul></div>
+      <div><h3>Dashboard</h3><ul><li>HTML + JavaScript (built)</li><li>Fed by the engine's output</li><li>Planned: React, Leaflet</li></ul></div>
+    </div>
+    <div class="alert-note">
+      <div class="bars"><h3>Why AI-based checking?</h3><p style="color:var(--muted)">Share of sensor faults caught in the DeepQC study on in-situ sensor data.</p>
+        <div class="bar a"><div><span>Deep learning (DeepQC)</span><b>95.6%</b></div><i style="width:95.6%"></i></div>
+        <div class="bar"><div><span>Rule-based checks</span><b>50.3%</b></div><i style="width:50.3%"></i></div>
+        <small>Source: DeepQC, arXiv:2311.06735</small></div>
+      <div class="plan"><h3>36-hour build plan</h3><ol>
+        <li><b>Hours 0–12</b><span>Fault simulator and station firmware</span></li>
+        <li><b>Hours 12–24</b><span>AI model and physics checks</span></li>
+        <li><b>Hours 24–30</b><span>Dashboard, map and alerts</span></li>
+        <li><b>Hours 30–36</b><span>Hardware testing and demo: inject a fake fault live and show the alert appear with its reason</span></li></ol></div>
+    </div>
+  </div>
+</section>
+
+<section id="engine">
+  <div class="w">
+    <p class="eyebrow">The working prototype</p>
+    <h2>Five layers, one probability, one explanation.</h2>
+    <p class="lead">Every layer is causal, so the same code scores a stored archive or a live one-minute stream. A learned fusion stage decides how much to trust each layer, so real weather is kept and faulty sensors are flagged.</p>
+    <div class="layers">
+      <div class="layer"><small>LAYER 1</small><h3>Quick check</h3><p>Range, jump, stuck and missing-packet rules from WMO No. 8. Near-certain errors raise an alert at once.</p></div>
+      <div class="layer"><small>LAYER 2</small><h3>Physics</h3><p>Temperature and humidity must imply a steady dew point (Bolton, 1980). Air moisture cannot jump in minutes.</p></div>
+      <div class="layer"><small>LAYER 3</small><h3>Temporal AI</h3><p>IsolationForest and a neural autoencoder learn each station's normal daily pattern from 17 residual features.</p></div>
+      <div class="layer"><small>LAYER 4</small><h3>Neighbours</h3><p>Compares the station with everything within 100 km. Stations already flagged are left out, and disagreement between neighbours widens the yardstick.</p></div>
+      <div class="layer"><small>LAYER 5</small><h3>Fusion</h3><p>A gradient-boosted model, trained on injected faults, turns all evidence into one fault probability per minute.</p></div>
+    </div>
+    <div class="outs">
+      <div class="card"><h3>Root cause</h3><p>Spike, sudden jump, slow drift, stuck value, noise burst, communication error or power glitch.</p></div>
+      <div class="card"><h3>Confidence and severity</h3><p>Every alert carries a probability and a High, Medium or Low severity.</p></div>
+      <div class="card"><h3>Corrected value</h3><p>What the sensor should have read, estimated from neighbours, or from its own history when none exist.</p></div>
+      <div class="card"><h3>Sensor health</h3><p>A 0 to 100 score per sensor, its drift rate, and the days until it leaves tolerance.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="results">
+  <div class="w">
+    <p class="eyebrow">Measured results</p>
+    <h2>Scored on data with faults injected at known times.</h2>
+    <p class="lead">This is the evaluation method in the problem statement. Three independent test runs, 57 stations, 4 days each, 550 injected faults in total. Half of the spikes, jumps, drifts and noise bursts are subtle, near the sensors' accuracy tolerance.</p>
+    <div class="rtable"><table id="rtab"><thead><tr><th>Method</th><th>Faults caught</th><th>Alerts that were real</th><th>False alarms / station-day</th><th>Real weather kept</th><th>Median time to alert</th><th>Root cause right</th></tr></thead><tbody></tbody></table></div>
+    <p class="note" id="rnote">Results load from the engine's evaluation file.</p>
+    <div class="ctas" style="margin-top:20px"><a class="btn" href="results.html">See every result</a><a class="btn" href="usecases.html">Read the use cases</a></div>
+  </div>
+</section>
+
+<section id="run">
+  <div class="w">
+    <p class="eyebrow">Run it yourself</p>
+    <h2>Fully executable, with examples.</h2>
+    <p class="lead">Python 3.9 or newer. The only dependencies are numpy, pandas, scipy and scikit-learn.</p>
+    <pre class="code"><i># install</i>
+pip install -r requirements.txt
+
+<i># see alerts on a simulated network with injected faults</i>
+python -m trinetra demo
+
+<i># the 55 C example from the problem statement, with the full explanation</i>
+python examples/quickstart.py
+
+<i># feed one minute at a time, as a live system would</i>
+python examples/stream_demo.py
+
+<i># run on your own CSV files</i>
+python examples/custom_csv.py
+
+<i># reproduce the accuracy table, then rebuild this website's data</i>
+python -m trinetra evaluate
+python -m trinetra export
+
+<i># the ESP32 edge layer (plain C++, compiles anywhere)</i>
+g++ -std=c++11 edge/edge_qc_test.cpp -o edge_test &amp;&amp; ./edge_test</pre>
+  </div>
+</section>
+
+<section id="feasibility">
+  <div class="w">
+    <p class="eyebrow">Feasibility and viability</p>
+    <h2>It can start working from day one.</h2>
+    <div class="cards">
+      <div class="card"><h3>Data already exists</h3><p>IMD runs about 1,008 stations that record T, P and RH. Free public archives (NOAA, Meteostat) add years more.</p></div>
+      <div class="card"><h3>Easy to test</h3><p>We add fake faults (spikes, stuck values, drift) to clean data at known times, then count how many we catch.</p></div>
+      <div class="card"><h3>Works from day one</h3><p>Physics checks need no training. The AI layer improves results over time.</p></div>
+      <div class="card"><h3>Low cost</h3><p>Runs on the kind of low-cost chip already used in stations. Open-source, no licence fees.</p></div>
+    </div>
+    <div class="tbl" role="table" aria-label="Risks and how TRINETRA handles them">
+      <div class="tr" role="row"><div role="columnheader">Risk</div><div role="columnheader">How we handle it</div></div>
+      <div class="tr" role="row"><div role="cell">A real 50 °C heatwave can look like an error</div><div role="cell">Real heat passes both the physics and neighbour checks. Data is only flagged with a confidence score, never deleted.</div></div>
+      <div class="tr" role="row"><div role="cell">Slow drift (0.1 °C a month) is hard to see</div><div role="cell">Compare each station with its own past years, and watch the daily pressure cycle.</div></div>
+      <div class="tr" role="row"><div role="cell">Some stations have no neighbours nearby</div><div role="cell">Use the physics check alone and show a lower confidence score.</div></div>
+      <div class="tr" role="row"><div role="cell">The station chip has very little memory</div><div role="cell">Tiny model on the station; the heavy AI runs on the central server.</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="impact">
+  <div class="w">
+    <p class="eyebrow">Impact and benefits</p>
+    <h2>Cut the time between a sensor going wrong and a person being told.</h2>
+    <p class="lead">Main user: the IMD network maintenance and forecasting team. Also helps disaster management authorities, farmers’ weather advisories and aviation. Today a broken station can go unnoticed for months. With TRINETRA the fault is flagged automatically, with a repair ticket naming the sensor and the problem.</p>
+    <div class="split">
+      <div class="ben"><small>SOCIAL</small><h3>Safer warnings</h3><p>Flood, cloudburst and heatwave alerts are only as good as the data behind them.</p></div>
+      <div class="ben"><small>ECONOMIC</small><h3>Low cost</h3><p>No new hardware, open-source, no per-station licence. Fewer wasted field visits.</p></div>
+      <div class="ben"><small>ENVIRONMENTAL</small><h3>Saves power</h3><p>Bad data is not sent, saving battery, solar power and bandwidth at remote stations.</p></div>
+      <div class="ben"><small>OPERATIONAL</small><h3>Scales with growth</h3><p>Mission Mausam adds stations faster than people can check by hand. TRINETRA keeps up.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="research">
+  <div class="w">
+    <p class="eyebrow">Research and references</p>
+    <h2>Built on published methods.</h2>
+    <div class="refs">
+      <div class="ref"><h3>Standards and official sources</h3><ul><li><b>WMO No. 8</b> · guide on weather instruments and data quality checks</li><li><b>Zahumenský (WMO, 2004)</b> · quality-control rules for automatic stations: range, step, stuck-value</li><li><b>IMD / Ministry of Earth Sciences</b> · 1,008 AWS, 200 Agro-AWS, 1,382 rain gauges</li><li><b>PIB, January 2026</b> · 200 new urban AWS for Delhi, Mumbai, Chennai and Pune</li></ul></div>
+      <div class="ref"><h3>AI-based quality control</h3><ul><li><b>Dahoui (ECMWF, 2023)</b> · autoencoder used in real operations to check observations</li><li><b>DeepQC (arXiv:2311.06735)</b> · caught 95.6% of sensor faults vs 50.3% for rule-based checks</li><li><b>Environmental Data Science (Cambridge UP)</b> · autoencoders for data quality</li><li><b>Estévez et al.</b> · simple checks confuse sensor drift with real heat bursts</li></ul></div>
+      <div class="ref"><h3>The physics behind our checks</h3><ul><li><b>Bolton (1980)</b> · formula linking temperature and humidity (vapour pressure)</li><li><b>Dai &amp; Wang (1999); Hamilton et al. (2008)</b> · pressure rises and falls twice a day by about 1–1.5 hPa, a built-in clock to test barometers</li><li><b>WMO No. 8</b> · comparing a station with its neighbours (buddy check)</li></ul></div>
+      <div class="ref"><h3>Data, tools and testing</h3><ul><li><b>Data</b> · IMD AWS archives, NOAA Integrated Surface Database, Meteostat</li><li><b>Tools</b> · PyTorch, TensorFlow Lite Micro, SHAP, scikit-learn, FastAPI, React</li><li><b>Testing</b> · fake faults added at known times, matching the official evaluation method</li></ul></div>
+    </div>
+    <p class="lead" style="margin-top:28px">The best AI systems need many sensors, but IMD stations give only three readings. TRINETRA fills this gap by combining physics with neighbouring stations.</p>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="w"><div class="cta-box"><div><h2 style="margin-bottom:8px">See an alert appear with its reason.</h2><p class="lead">Open the dashboard and inject a fault into any station. The alert you see is computed by the engine.</p></div><a class="btn pri" href="dashboard.html">Open the live dashboard</a></div></div>
+</section>
+
+<footer><div class="w"><span>TRINETRA · Team Secure OOPS · Team ID 126173 · Smart India Hackathon 2026, problem statement SIH26073</span><span>Readings are simulated. All alerts are produced by the TRINETRA engine.</span></div></footer>
+
+<script src="data.js"></script>
+<script src="web/ui.js"></script>
+<script>
+(function () {
+  function rng(seed) { var a = seed; return function () { a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  function $(id) { return document.getElementById(id); }
+
+  // hero: three gently moving readings
+  var n = 40, buf = { T: [], P: [], R: [] }, k = 0;
+  function sample(i) { return { T: 31.4 + 0.9 * Math.sin(i / 6) + 0.15 * Math.sin(i * 1.7), P: 1008.2 - 0.5 * Math.sin(i / 9) + 0.05 * Math.sin(i * 2.1), R: 62 - 5 * Math.sin(i / 6) + 0.6 * Math.sin(i * 1.3) }; }
+  for (; k < n; k++) { var s = sample(k); buf.T.push(s.T); buf.P.push(s.P); buf.R.push(s.R); }
+  function path(a) { var mn = Math.min.apply(null, a), mx = Math.max.apply(null, a), r = (mx - mn) || 1; return "M" + a.map(function (q, i) { return (i * 200 / (a.length - 1)).toFixed(1) + "," + (40 - 36 * (q - mn) / r).toFixed(1); }).join("L"); }
+  function draw() { $("lT").setAttribute("d", path(buf.T)); $("lP").setAttribute("d", path(buf.P)); $("lR").setAttribute("d", path(buf.R));
+    var e = buf; $("vT").innerHTML = e.T[n - 1].toFixed(1) + "<span>°C</span>"; $("vP").innerHTML = e.P[n - 1].toFixed(1) + "<span>hPa</span>"; $("vR").innerHTML = Math.round(e.R[n - 1]) + "<span>%</span>"; }
+  draw();
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) setInterval(function () { var s = sample(k++); buf.T.push(s.T); buf.P.push(s.P); buf.R.push(s.R); buf.T.shift(); buf.P.shift(); buf.R.shift(); draw(); }, 1200);
+
+  // engine-driven demo and results table
+  var T = window.TUI, D = T && T.D;
+  function pc(x) { return x == null ? "\u2013" : Math.round(x * 100) + "%"; }
+  if (D) {
+    var DEL = D.runs["AWS-DEL-014"];
+    function render(mode) {
+      var run = mode === "heat" ? DEL.heatwave : DEL.level_shift;
+      $("dchart").innerHTML = T.chart("T", run, { H: 250 });
+      var i = run.incident, e = run.event;
+      var rows = mode === "heat"
+        ? [{ s: 1, t: "Physics check", x: "Temperature rose and humidity fell to match. Dew point steady." }, { s: 1, t: "Neighbour check", x: "All " + D.stations[0].neighbours.length + " nearby stations rose by about the same amount." }]
+        : i.checks.filter(function (c) { return c.id === "physics" || c.id === "neighbour"; }).map(function (c) { return { s: c.state === "fail" ? 0 : 1, t: c.title, x: c.text }; });
+      var html = rows.map(function (r) { return '<div class="vrow' + (r.s ? "" : " bad") + '"><i>' + (r.s ? "\u2713" : "!") + '</i><div><b>' + r.t + '</b><span>' + r.x + '</span></div></div>'; }).join("");
+      if (mode === "heat") html += '<div class="result real">' + (e ? e.event_kind : "Real weather") + '<small>Kept in the record and marked as an extreme event. Not deleted.</small></div>';
+      else html += '<div class="result fault">' + i.label + ' \u00B7 ' + Math.round(i.confidence * 100) + '% confidence<small>' + i.action + '. Corrected value ' + T.f(i.corrected[0].corrected, 1) + ' \u00B0C instead of ' + T.f(i.corrected[0].observed, 1) + ' \u00B0C.</small></div>';
+      $("dverdict").innerHTML = html;
+      $("tabH").setAttribute("aria-pressed", mode === "heat"); $("tabF").setAttribute("aria-pressed", mode === "fault");
+    }
+    $("tabH").onclick = function () { render("heat"); }; $("tabF").onclick = function () { render("fault"); };
+    render("heat");
+    var ev = D.evaluation;
+    if (ev) {
+      var order = ["Threshold QC only", "Temporal AI only", "TRINETRA (full)"];
+      $("rtab").querySelector("tbody").innerHTML = order.map(function (k) {
+        var r = ev.summary[k], full = k === "TRINETRA (full)";
+        return '<tr class="' + (full ? "hl" : "") + '"><td>' + (full ? "TRINETRA (all 5 layers)" : k) + '</td><td>' + pc(r.recall) + '</td><td>' + pc(r.precision) + '</td><td>' + r.false_alarms_per_station_day.toFixed(3) + '</td><td>' + pc(r.genuine_kept_rate) + '</td><td>' + (r.median_latency_min == null ? "\u2013" : r.median_latency_min.toFixed(0) + " min") + '</td><td>' + (r.root_cause_accuracy ? pc(r.root_cause_accuracy) : "not offered") + '</td></tr>';
+      }).join("");
+      var f = ev.summary["TRINETRA (full)"], q = ev.summary["Threshold QC only"];
+      $("rnote").textContent = "Threshold QC only checks range, jump, stuck and missing values. Temporal AI only has no physics or neighbour context. Averages over " + ev.seeds.length + " test runs (" + f.injected + " injected faults). The data is simulated, so real archives will be harder; see the results page for stress tests and limits.";
+    }
+  } else { $("dchart").innerHTML = '<p class="note">Open this page together with data.js to see the engine output.</p>'; }
+})();
+</script>
+
+</body></html>
